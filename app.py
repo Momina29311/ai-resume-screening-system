@@ -1,19 +1,52 @@
-import argparse
+from pathlib import Path
+import tempfile
+
+import streamlit as st
+
 from src.parser import extract_text_from_pdf, save_extracted_text
 
-def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--resume", required=True, help="Path to resume PDF")
-    args = parser.parse_args()
+st.set_page_config(page_title="Resume Screening System", layout="wide")
+st.title("Resume Screening System")
+st.write("Upload a PDF resume to extract text and save a .txt copy.")
 
-    text = extract_text_from_pdf(args.resume)
-    print("========== Resume Parsed Successfully ==========")
-    print(f"Characters Extracted: {len(text)}")
-    print(f"Words Extracted: {len(text.split())}")
-    print("\nPreview:\n")
-    print(text[:1500])
+uploaded_file = st.file_uploader("Upload a resume PDF", type=["pdf"])
 
-    save_extracted_text(args.resume)
+col1, col2 = st.columns(2)
+run_parse = col1.button("Parse Resume", type="primary")
+clear_btn = col2.button("Clear")
 
-if __name__ == "__main__":
-    main()
+if clear_btn:
+    st.rerun()
+
+if uploaded_file is not None:
+    st.success(f"Uploaded: {uploaded_file.name}")
+    st.write(f"File type: {uploaded_file.type}")
+
+    if run_parse:
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp:
+            tmp.write(uploaded_file.getbuffer())
+            tmp_path = tmp.name
+
+        try:
+            text = extract_text_from_pdf(tmp_path)
+            save_path = save_extracted_text(tmp_path)
+
+            st.success("Resume parsed successfully.")
+            st.write(f"Characters extracted: {len(text)}")
+            st.write(f"Words extracted: {len(text.split())}")
+
+            st.subheader("Preview")
+            st.text_area("Extracted text", text, height=400)
+
+            st.info(f"Saved extracted text to: {save_path}")
+
+            st.download_button(
+                label="Download extracted text",
+                data=text,
+                file_name=Path(uploaded_file.name).stem + ".txt",
+                mime="text/plain",
+            )
+        finally:
+            Path(tmp_path).unlink(missing_ok=True)
+else:
+    st.info("Upload a PDF to begin.")
