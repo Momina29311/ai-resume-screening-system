@@ -4,7 +4,7 @@
 An end-to-end AI-powered Resume Screening System that parses resumes, preprocesses text using NLP, extracts technical skills, and intelligently matches resumes with job descriptions.
 
 
-> 🚧 Currently under active development as part of my #100DaysOfMachineLearning journey.
+> 🚧 Currently under active development as part of my #MAchineLearninginDataScience journey.
 
 
 ---
@@ -296,15 +296,11 @@ streamlit run app.py
 
 ## Resume Upload
 
-![Resume Upload](image-2.png)
+![Resume Upload](images/image-2.png)
 
 ## Resume Preview
 
-
-![Resume Preview](image-1.png)
-
-
----
+![Resume Preview](images/image.png)
 
 
 # 📈 Future Enhancements
