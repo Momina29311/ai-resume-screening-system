@@ -296,11 +296,11 @@ streamlit run app.py
 
 ## Resume Upload
 
-![Resume Upload](images/image-2.png)
+![Resume Upload](images/upload.png)
 
 ## Resume Preview
 
-![Resume Preview](images/image.png)
+![Resume Preview](images/preview.png)
 
 
 # 📈 Future Enhancements
