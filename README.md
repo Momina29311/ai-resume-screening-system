@@ -4,7 +4,7 @@
 An end-to-end AI-powered Resume Screening System that parses resumes, preprocesses text using NLP, extracts technical skills, and intelligently matches resumes with job descriptions.
 
 
-> 🚧 Currently under active development as part of my #100DaysOfMachineLearning journey.
+> 🚧 Currently under active development as part of my #MAchineLearninginDataScience journey.
 
 
 ---
