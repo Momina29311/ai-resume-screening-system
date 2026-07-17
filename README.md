@@ -291,18 +291,6 @@ streamlit run app.py
 ---
 
 
-# 📷 Screenshots
-
-
-## Resume Upload
-
-![Resume Upload](images/upload.png)
-
-## Resume Preview
-
-![Resume Preview](images/preview.png)
-
-
 # 📈 Future Enhancements
 
 
