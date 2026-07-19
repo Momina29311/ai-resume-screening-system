@@ -1,9 +1,11 @@
 from pathlib import Path
 import tempfile
+import json
 
 import pandas as pd
 import streamlit as st
 
+from src.ats_score import ATSScorer
 from src.parser import extract_text_from_pdf, save_extracted_text
 from src.skill_extractor import extract_skills, save_skills, load_skills
 from src.matcher import match_resume_to_job, save_match_result
@@ -11,8 +13,9 @@ from src.matcher import match_resume_to_job, save_match_result
 
 st.set_page_config(page_title="Resume Screening System", layout="wide")
 st.title("Resume Screening System")
-st.write("Upload a PDF resume to extract text, detect skills, and compare it with a job description.")
-
+st.write(
+    "Upload a PDF resume to extract text, detect skills, compare it with a job description, and calculate ATS score."
+)
 
 if "resume_text" not in st.session_state:
     st.session_state.resume_text = ""
@@ -23,6 +26,7 @@ if "skills_db" not in st.session_state:
 if "job_description" not in st.session_state:
     st.session_state.job_description = ""
 
+ats_scorer = ATSScorer()
 
 uploaded_file = st.file_uploader("Upload a resume PDF", type=["pdf"])
 
@@ -48,7 +52,7 @@ else:
         "Paste the job description below",
         value=st.session_state.job_description,
         height=250,
-        placeholder="Paste the job description here..."
+        placeholder="Paste the job description here...",
     )
 
     if run_parse:
@@ -98,7 +102,11 @@ else:
                         "Found": "✅" if skill.lower() in lower_text else "❌",
                     }
                 )
-            st.dataframe(pd.DataFrame(comparison_data), use_container_width=True, hide_index=True)
+            st.dataframe(
+                pd.DataFrame(comparison_data),
+                use_container_width=True,
+                hide_index=True,
+            )
 
             st.info(f"Saved extracted text to: {save_path}")
             st.info(f"Saved skills to: {skills_path}")
@@ -122,33 +130,80 @@ else:
             skills_db = st.session_state.skills_db
             job_skills = extract_skills(st.session_state.job_description, skills_db)
 
-            result = match_resume_to_job(resume_skills, job_skills)
-            result_path = save_match_result(uploaded_file.name, result)
+            match_result = match_resume_to_job(resume_skills, job_skills)
+            result_path = save_match_result(uploaded_file.name, match_result)
 
-            score = result["match_score"]
-            score_int = max(0, min(100, int(round(score))))
+            parsed_result = {
+                "skills": resume_skills,
+                "education": [],
+                "experience": [],
+                "projects": [],
+                "certifications": [],
+                "sections_present": {
+                    "contact_info": True,
+                    "summary": True,
+                    "skills": True,
+                    "education": False,
+                    "experience": False,
+                },
+            }
 
-            st.subheader("Resume Match")
-            st.metric("Match Score", f"{score:.1f}%")
-            st.progress(score_int)
+            ats_result = ats_scorer.score(parsed_result, match_result)
+            ats_data = ats_result.to_dict()
+
+            scores_dir = Path("data/scores")
+            scores_dir.mkdir(parents=True, exist_ok=True)
+
+            with open(scores_dir / "resume_score.json", "w", encoding="utf-8") as f:
+                json.dump(ats_data, f, indent=2)
+
+            st.subheader("Resume Summary")
+            c1, c2, c3, c4 = st.columns(4)
+
+            c1.metric("Match Score", f"{ats_data['match_score']}%")
+            c2.metric("ATS Score", f"{ats_data['ats_score']}/100")
+            c3.metric("Skills Found", ats_data["skills_found"])
+            c4.metric("Missing Skills", len(ats_data["missing_skills"]))
+
+            st.subheader("ATS Score Breakdown")
+            breakdown = ats_data["breakdown"]
+
+            b1, b2, b3 = st.columns(3)
+            with b1:
+                st.metric("Skill Match", f"{breakdown['skill_match']}/40")
+                st.metric("Projects", f"{breakdown['projects']}/10")
+            with b2:
+                st.metric("Education", f"{breakdown['education']}/15")
+                st.metric("Certifications", f"{breakdown['certifications']}/10")
+            with b3:
+                st.metric("Experience", f"{breakdown['experience']}/20")
+                st.metric("Completeness", f"{breakdown['completeness']}/5")
 
             st.subheader("Matched Skills")
-            if result["matched_skills"]:
-                st.write(", ".join(result["matched_skills"]))
+            if match_result["matched_skills"]:
+                st.write(", ".join(match_result["matched_skills"]))
             else:
                 st.write("None")
 
             st.subheader("Missing Skills")
-            if result["missing_skills"]:
-                st.write(", ".join(result["missing_skills"]))
+            if match_result["missing_skills"]:
+                st.write(", ".join(match_result["missing_skills"]))
             else:
                 st.write("None")
 
+            st.subheader("Resume Feedback")
+            if ats_data["feedback"]:
+                for item in ats_data["feedback"]:
+                    st.write(f"• {item}")
+            else:
+                st.write("No feedback available.")
+
             st.subheader("Recommendations")
-            if result["recommendations"]:
-                for item in result["recommendations"]:
+            if ats_data["recommendations"]:
+                for item in ats_data["recommendations"]:
                     st.write(f"• {item}")
             else:
                 st.write("No recommendations.")
 
             st.info(f"Saved match result to: {result_path}")
+            st.info(f"Saved ATS score to: {scores_dir / 'resume_score.json'}")

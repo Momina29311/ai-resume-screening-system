@@ -1,0 +1,9 @@
+__pycache__/
+*.pyc
+data/resumes/
+data/processed/
+data/extracted_skills/
+data/matches/
+data/scores/
+data/skills/
+images/
