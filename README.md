@@ -6,9 +6,9 @@
 [![Streamlit](https://img.shields.io/badge/streamlit-app-red.svg?logo=streamlit&logoColor=white)](https://streamlit.io/)
 [![Tests](https://img.shields.io/badge/tests-30%20passing-brightgreen.svg)](https://github.com/Momina29311/ai-resume-screening-system)
 
-ResumeIQ is an end-to-end AI-powered resume screening system that parses resumes, preprocesses text with NLP, extracts technical skills, matches resumes to job descriptions, and predicts a transparent ATS score.
+ResumeIQ is an AI-powered resume screening system that parses resumes, preprocesses text with NLP, extracts skills, matches resumes with job descriptions, and predicts an ATS score using a transparent rule-based engine.
 
-This project is being built publicly as part of my machine learning and data science journey.
+This project is being built publicly as part of my machine learning and data science learning journey.
 
 ---
 
@@ -20,7 +20,7 @@ ResumeIQ helps automate early-stage resume screening by combining:
 - Skill extraction.
 - Resume-to-job matching.
 - ATS score prediction.
-- Streamlit-based dashboard visualization.
+- Streamlit dashboard visualization.
 
 It is designed to make resume analysis more structured, explainable, and useful for both candidates and recruiters.
 
@@ -28,7 +28,7 @@ It is designed to make resume analysis more structured, explainable, and useful 
 
 ## ✅ What’s Completed
 
-### Core pipeline
+### Core Pipeline
 - ✅ Project planning and architecture.
 - ✅ Resume parsing engine.
 - ✅ NLP preprocessing pipeline.
@@ -36,7 +36,7 @@ It is designed to make resume analysis more structured, explainable, and useful 
 - ✅ Resume-to-job matching engine.
 - ✅ ATS score prediction engine.
 
-### Application layer
+### Application Layer
 - ✅ Streamlit dashboard integration.
 - ✅ Resume upload and parsing.
 - ✅ Extracted text preview and download.
@@ -71,7 +71,7 @@ This version introduced the ATS Score Prediction Engine, which evaluates resume 
 
 ResumeIQ now calculates an ATS score using a transparent rule-based system.
 
-### Scoring categories
+### Scoring Categories
 - Skill Match — 40
 - Education — 15
 - Experience — 20
@@ -192,8 +192,8 @@ Dashboard + JSON Export
 ai-resume-screening-system/
 │
 ├── app.py
-├── requirements.txt
 ├── README.md
+├── requirements.txt
 │
 ├── data/
 │   ├── raw/
@@ -209,9 +209,8 @@ ai-resume-screening-system/
 │   ├── ats_score.py
 │   └── config.py
 │
-├── models/
-├── notebooks/
-└── tests/
+├── tests/
+└── notebooks/
 ```
 
 ---

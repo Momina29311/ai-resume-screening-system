@@ -9,12 +9,13 @@ from src.ats_score import ATSScorer
 from src.parser import extract_text_from_pdf, save_extracted_text
 from src.skill_extractor import extract_skills, save_skills, load_skills
 from src.matcher import match_resume_to_job, save_match_result
+from src.ranking import rank_candidates, save_ranking_results
 
 
 st.set_page_config(page_title="Resume Screening System", layout="wide")
 st.title("Resume Screening System")
-st.write(
-    "Upload a PDF resume to extract text, detect skills, compare it with a job description, and calculate ATS score."
+st.caption(
+    "Upload resumes, extract text, detect skills, compare with a job description, and rank candidates."
 )
 
 if "resume_text" not in st.session_state:
@@ -25,27 +26,36 @@ if "skills_db" not in st.session_state:
     st.session_state.skills_db = load_skills()
 if "job_description" not in st.session_state:
     st.session_state.job_description = ""
+if "parsed_resumes" not in st.session_state:
+    st.session_state.parsed_resumes = []
+if "ranking_results" not in st.session_state:
+    st.session_state.ranking_results = []
 
 ats_scorer = ATSScorer()
 
-uploaded_file = st.file_uploader("Upload a resume PDF", type=["pdf"])
+st.sidebar.header("Project Tools")
+st.sidebar.write("Use this app to parse resumes and rank them against a job description.")
 
-col1, col2 = st.columns(2)
-run_parse = col1.button("Parse Resume", type="primary")
-compare_btn = col2.button("Compare Resume")
-clear_btn = st.button("Clear")
+tab1, tab2 = st.tabs(["Parse & Skills", "Ranking"])
 
-if clear_btn:
-    st.session_state.resume_text = ""
-    st.session_state.resume_skills = []
-    st.session_state.job_description = ""
-    st.rerun()
+with tab1:
+    uploaded_files = st.file_uploader(
+        "Upload resume PDFs",
+        type=["pdf"],
+        accept_multiple_files=True
+    )
 
-if uploaded_file is None:
-    st.info("Upload a PDF to begin.")
-else:
-    st.success(f"Uploaded: {uploaded_file.name}")
-    st.write(f"File type: {uploaded_file.type}")
+    col1, col2, col3 = st.columns(3)
+    run_parse = col1.button("Parse Resumes", type="primary")
+    clear_btn = col3.button("Clear")
+
+    if clear_btn:
+        st.session_state.resume_text = ""
+        st.session_state.resume_skills = []
+        st.session_state.parsed_resumes = []
+        st.session_state.ranking_results = []
+        st.session_state.job_description = ""
+        st.rerun()
 
     st.subheader("Job Description")
     st.session_state.job_description = st.text_area(
@@ -55,155 +65,163 @@ else:
         placeholder="Paste the job description here...",
     )
 
-    if run_parse:
-        with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp:
-            tmp.write(uploaded_file.getbuffer())
-            tmp_path = tmp.name
+    if not uploaded_files:
+        st.info("Upload one or more PDF resumes to begin.")
+    else:
+        st.success(f"Uploaded {len(uploaded_files)} resume(s)")
 
-        try:
-            text = extract_text_from_pdf(tmp_path)
-            skills_db = st.session_state.skills_db
-            skills = extract_skills(text, skills_db)
+        if run_parse:
+            parsed_resumes = []
 
-            st.session_state.resume_text = text
-            st.session_state.resume_skills = skills
+            for uploaded_file in uploaded_files:
+                with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp:
+                    tmp.write(uploaded_file.getbuffer())
+                    tmp_path = tmp.name
 
-            save_path = save_extracted_text(tmp_path)
-            skills_path = save_skills(uploaded_file.name, skills)
+                try:
+                    text = extract_text_from_pdf(tmp_path)
+                    skills_db = st.session_state.skills_db
+                    skills = extract_skills(text, skills_db)
 
-            st.success("Resume parsed successfully.")
-            st.write(f"Characters extracted: {len(text)}")
-            st.write(f"Words extracted: {len(text.split())}")
+                    save_path = save_extracted_text(tmp_path)
+                    skills_path = save_skills(uploaded_file.name, skills)
 
-            stat1, stat2, stat3 = st.columns(3)
-            stat1.metric("Skills Detected", len(skills))
-            stat2.metric("Unique Skills", len(set(skills)))
-            stat3.metric("Database Size", len(skills_db))
+                    parsed_resumes.append(
+                        {
+                            "name": uploaded_file.name,
+                            "text": text,
+                            "skills": skills,
+                            "save_path": save_path,
+                            "skills_path": skills_path,
+                        }
+                    )
+                finally:
+                    Path(tmp_path).unlink(missing_ok=True)
 
-            st.subheader("Preview")
-            st.text_area("Extracted text", text, height=400)
+            st.session_state.parsed_resumes = parsed_resumes
+            st.session_state.resume_text = parsed_resumes[0]["text"] if parsed_resumes else ""
+            st.session_state.resume_skills = parsed_resumes[0]["skills"] if parsed_resumes else []
 
-            st.subheader("Detected Skills")
-            if skills:
-                badge_cols = st.columns(3)
-                for i, skill in enumerate(skills):
-                    with badge_cols[i % 3]:
-                        st.badge(skill, color="blue")
-            else:
-                st.warning("No skills detected.")
+            st.success("Resumes parsed successfully.")
 
-            st.subheader("Skill Comparison")
-            comparison_data = []
-            lower_text = text.lower()
-            for skill in skills_db[:50]:
-                comparison_data.append(
-                    {
-                        "Skill": skill,
-                        "Found": "✅" if skill.lower() in lower_text else "❌",
-                    }
-                )
-            st.dataframe(
-                pd.DataFrame(comparison_data),
-                use_container_width=True,
-                hide_index=True,
-            )
+            for resume in parsed_resumes:
+                with st.expander(f"Preview: {resume['name']}", expanded=False):
+                    text = resume["text"]
+                    skills = resume["skills"]
 
-            st.info(f"Saved extracted text to: {save_path}")
-            st.info(f"Saved skills to: {skills_path}")
+                    st.write(f"Characters extracted: {len(text)}")
+                    st.write(f"Words extracted: {len(text.split())}")
 
-            st.download_button(
-                label="Download extracted text",
-                data=text,
-                file_name=Path(uploaded_file.name).stem + ".txt",
-                mime="text/plain",
-            )
-        finally:
-            Path(tmp_path).unlink(missing_ok=True)
+                    stat1, stat2, stat3 = st.columns(3)
+                    stat1.metric("Skills Detected", len(skills))
+                    stat2.metric("Unique Skills", len(set(skills)))
+                    stat3.metric("Database Size", len(st.session_state.skills_db))
+
+                    st.text_area("Extracted text", text, height=300)
+
+                    st.subheader("Detected Skills")
+                    if skills:
+                        badge_cols = st.columns(3)
+                        for i, skill in enumerate(skills):
+                            with badge_cols[i % 3]:
+                                st.badge(skill, color="blue")
+                    else:
+                        st.warning("No skills detected.")
+
+                    st.subheader("Skill Comparison")
+                    comparison_data = []
+                    lower_text = text.lower()
+                    for skill in st.session_state.skills_db[:50]:
+                        comparison_data.append(
+                            {
+                                "Skill": skill,
+                                "Found": "✅" if skill.lower() in lower_text else "❌",
+                            }
+                        )
+
+                    st.dataframe(
+                        pd.DataFrame(comparison_data),
+                        use_container_width=True,
+                        hide_index=True,
+                    )
+
+                    st.info(f"Saved extracted text to: {resume['save_path']}")
+                    st.info(f"Saved skills to: {resume['skills_path']}")
+
+with tab2:
+    st.subheader("Ranking Candidates")
+
+    compare_btn = st.button("Rank Candidates")
 
     if compare_btn:
-        if not st.session_state.resume_text:
-            st.warning("Please parse the resume first.")
+        if not st.session_state.parsed_resumes:
+            st.warning("Please parse the resumes first.")
         elif not st.session_state.job_description.strip():
             st.warning("Please paste a job description first.")
         else:
-            resume_skills = st.session_state.resume_skills
-            skills_db = st.session_state.skills_db
-            job_skills = extract_skills(st.session_state.job_description, skills_db)
+            ranked_results = rank_candidates(
+                st.session_state.parsed_resumes,
+                st.session_state.job_description,
+                st.session_state.skills_db,
+            )
 
-            match_result = match_resume_to_job(resume_skills, job_skills)
-            result_path = save_match_result(uploaded_file.name, match_result)
+            st.session_state.ranking_results = ranked_results
+            save_path = save_ranking_results(ranked_results)
 
-            parsed_result = {
-                "skills": resume_skills,
-                "education": [],
-                "experience": [],
-                "projects": [],
-                "certifications": [],
-                "sections_present": {
-                    "contact_info": True,
-                    "summary": True,
-                    "skills": True,
-                    "education": False,
-                    "experience": False,
-                },
-            }
+            st.subheader("🏆 Candidate Rankings")
 
-            ats_result = ats_scorer.score(parsed_result, match_result)
-            ats_data = ats_result.to_dict()
+            if ranked_results:
+                ranking_df = pd.DataFrame(
+                    [
+                        {
+                            "Rank": i + 1,
+                            "Candidate": item["name"],
+                            "ATS Score": item["ats_score"],
+                            "Match %": item["match_percent"],
+                        }
+                        for i, item in enumerate(ranked_results)
+                    ]
+                )
 
-            scores_dir = Path("data/scores")
-            scores_dir.mkdir(parents=True, exist_ok=True)
+                st.dataframe(ranking_df, use_container_width=True, hide_index=True)
 
-            with open(scores_dir / "resume_score.json", "w", encoding="utf-8") as f:
-                json.dump(ats_data, f, indent=2)
+                best = ranked_results[0]
+                st.subheader("⭐ Best Candidate")
+                top_col1, top_col2, top_col3 = st.columns(3)
+                top_col1.metric("Candidate", best["name"])
+                top_col2.metric("ATS Score", best["ats_score"])
+                top_col3.metric("Match %", f"{best['match_percent']}%")
 
-            st.subheader("Resume Summary")
-            c1, c2, c3, c4 = st.columns(4)
+                st.success("Recommendation: Highly recommended for interview.")
 
-            c1.metric("Match Score", f"{ats_data['match_score']}%")
-            c2.metric("ATS Score", f"{ats_data['ats_score']}/100")
-            c3.metric("Skills Found", ats_data["skills_found"])
-            c4.metric("Missing Skills", len(ats_data["missing_skills"]))
+                st.subheader("Candidate Details")
+                for item in ranked_results:
+                    with st.expander(f"{item['rank']}. {item['name']}"):
+                        c1, c2, c3 = st.columns(3)
+                        c1.metric("ATS Score", item["ats_score"])
+                        c2.metric("Match %", f"{item['match_percent']}%")
+                        c3.metric("Matched Skills", len(item["matched_skills"]))
 
-            st.subheader("ATS Score Breakdown")
-            breakdown = ats_data["breakdown"]
+                        st.write("**Matched Skills:**")
+                        st.write(", ".join(item["matched_skills"]) if item["matched_skills"] else "None")
 
-            b1, b2, b3 = st.columns(3)
-            with b1:
-                st.metric("Skill Match", f"{breakdown['skill_match']}/40")
-                st.metric("Projects", f"{breakdown['projects']}/10")
-            with b2:
-                st.metric("Education", f"{breakdown['education']}/15")
-                st.metric("Certifications", f"{breakdown['certifications']}/10")
-            with b3:
-                st.metric("Experience", f"{breakdown['experience']}/20")
-                st.metric("Completeness", f"{breakdown['completeness']}/5")
+                        st.write("**Missing Skills:**")
+                        st.write(", ".join(item["missing_skills"]) if item["missing_skills"] else "None")
 
-            st.subheader("Matched Skills")
-            if match_result["matched_skills"]:
-                st.write(", ".join(match_result["matched_skills"]))
+                        st.write("**Feedback:**")
+                        if item.get("feedback"):
+                            for fb in item["feedback"]:
+                                st.write(f"• {fb}")
+                        else:
+                            st.write("No feedback available.")
+
+                        st.write("**Recommendations:**")
+                        if item.get("recommendations"):
+                            for rec in item["recommendations"]:
+                                st.write(f"• {rec}")
+                        else:
+                            st.write("No recommendations.")
+
+                st.info(f"Saved ranking results to: {save_path}")
             else:
-                st.write("None")
-
-            st.subheader("Missing Skills")
-            if match_result["missing_skills"]:
-                st.write(", ".join(match_result["missing_skills"]))
-            else:
-                st.write("None")
-
-            st.subheader("Resume Feedback")
-            if ats_data["feedback"]:
-                for item in ats_data["feedback"]:
-                    st.write(f"• {item}")
-            else:
-                st.write("No feedback available.")
-
-            st.subheader("Recommendations")
-            if ats_data["recommendations"]:
-                for item in ats_data["recommendations"]:
-                    st.write(f"• {item}")
-            else:
-                st.write("No recommendations.")
-
-            st.info(f"Saved match result to: {result_path}")
-            st.info(f"Saved ATS score to: {scores_dir / 'resume_score.json'}")
+                st.warning("No ranking results were generated.")
