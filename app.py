@@ -141,7 +141,7 @@ with tab1:
 
                     st.dataframe(
                         pd.DataFrame(comparison_data),
-                        use_container_width=True,
+                        width="stretch",
                         hide_index=True,
                     )
 
