@@ -261,15 +261,26 @@ pip install -r requirements.txt
 streamlit run app.py
 ```
 
+## 🐳 Docker Support
+
+This project can now run inside a Docker container.
+
+### Build Docker Image
+```bash
+docker build -t resume-screening .
+```
+
+### Run Container
+```bash
+docker run -p 8501:8501 resume-screening
+```
+
+The application will be available at:
+http://localhost:8501
 ---
 
 ## 📈 Future Enhancements
 
-- OCR support for scanned resumes.
-- Candidate ranking system.
-- Resume-to-job fit visualization.
-- ML-based ATS scoring.
-- Docker deployment.
 - Cloud deployment.
 
 ---

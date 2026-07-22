@@ -4,8 +4,10 @@ import json
 import pandas as pd
 
 
-SKILLS_FILE = Path("data/skills/skills.csv")
-OUTPUT_DIR = Path("data/extracted_skills")
+BASE_DIR = Path(__file__).resolve().parent.parent
+SKILLS_FILE = BASE_DIR / "data" / "skills" / "skills.csv"
+OUTPUT_DIR = BASE_DIR / "data" / "extracted_skills"
+
 
 
 def load_skills(skills_file: Path = SKILLS_FILE) -> list[str]:
