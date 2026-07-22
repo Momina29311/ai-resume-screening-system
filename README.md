@@ -1,179 +1,131 @@
 # 🚀 ResumeIQ – AI-Powered Resume Screening System
 
-[![Version](https://img.shields.io/badge/version-v0.6-blue.svg)](https://github.com/Momina29311/ai-resume-screening-system)
+[![Version](https://img.shields.io/badge/version-v0.9-blue.svg)](https://github.com/Momina29311/ai-resume-screening-system)
 [![Status](https://img.shields.io/badge/status-active%20development-orange.svg)](https://github.com/Momina29311/ai-resume-screening-system)
 [![Python](https://img.shields.io/badge/python-3.14+-3776AB.svg?logo=python&logoColor=white)](https://www.python.org/)
-[![Streamlit](https://img.shields.io/badge/streamlit-app-red.svg?logo=streamlit&logoColor=white)](https://streamlit.io/)
+[![Streamlit](https://img.shields.io/badge/streamlit-live-red.svg?logo=streamlit&logoColor=white)](https://streamlit.io/)
+[![Docker](https://img.shields.io/badge/docker-supported-2496ED.svg?logo=docker&logoColor=white)](https://www.docker.com/)
 [![Tests](https://img.shields.io/badge/tests-30%20passing-brightgreen.svg)](https://github.com/Momina29311/ai-resume-screening-system)
 
-ResumeIQ is an AI-powered resume screening system that parses resumes, preprocesses text with NLP, extracts skills, matches resumes with job descriptions, and predicts an ATS score using a transparent rule-based engine.
+ResumeIQ is an AI-powered Resume Screening System that automates the early stages of recruitment by parsing resumes, extracting skills, comparing them against job descriptions, calculating ATS scores, ranking candidates, and providing actionable feedback through an interactive Streamlit dashboard.
 
-This project is being built publicly as part of my machine learning and data science learning journey.
-
----
-
-## 📌 Project Overview
-
-ResumeIQ helps automate early-stage resume screening by combining:
-- Resume parsing.
-- NLP preprocessing.
-- Skill extraction.
-- Resume-to-job matching.
-- ATS score prediction.
-- Streamlit dashboard visualization.
-
-It is designed to make resume analysis more structured, explainable, and useful for both candidates and recruiters.
+This project is being built publicly as part of my Machine Learning and Data Science learning journey.
 
 ---
 
-## ✅ What’s Completed
+# 🌐 Live Demo
 
-### Core Pipeline
-- ✅ Project planning and architecture.
-- ✅ Resume parsing engine.
-- ✅ NLP preprocessing pipeline.
-- ✅ Skill extraction engine.
-- ✅ Resume-to-job matching engine.
-- ✅ ATS score prediction engine.
+**Streamlit App**
 
-### Application Layer
-- ✅ Streamlit dashboard integration.
-- ✅ Resume upload and parsing.
-- ✅ Extracted text preview and download.
-- ✅ Skill badges and skill comparison table.
-- ✅ Match score display.
-- ✅ ATS score display with breakdown.
-- ✅ Feedback and recommendations section.
-- ✅ JSON export for score results.
-
-### Testing
-- ✅ Unit tests for ATS scoring.
-- ✅ 30 passing ATS tests.
+https://momina-resumeiq.streamlit.app
 
 ---
 
-## 🆕 Latest Updates
+# ✨ Features
 
-### ResumeIQ v0.6
-This version introduced the ATS Score Prediction Engine, which evaluates resume quality beyond simple skill matching.
+## 📄 Resume Parsing
+- Upload one or multiple PDF resumes
+- Extract resume text
+- Preview extracted content
+- Download extracted text
+- Character & word statistics
 
-#### Added in this version
-- Weighted ATS scoring system.
-- Score breakdown by category.
-- Resume quality feedback.
-- Personalized suggestions.
-- JSON export of ATS results.
-- Dashboard metrics for match score, ATS score, skills found, and missing skills.
+## 🧠 NLP Preprocessing
+- Clean extracted text
+- Normalize formatting
+- Prepare text for analysis
 
----
+## 🎯 Skill Extraction
+- Detect technical skills
+- Skill badge visualization
+- Skill comparison against database
+- Export extracted skills as JSON
 
-## ⭐ ATS Score Prediction
+## 🔎 Resume Matching
+- Compare resumes with job descriptions
+- Detect matched skills
+- Detect missing skills
+- Calculate match percentage
 
-ResumeIQ now calculates an ATS score using a transparent rule-based system.
+## ⭐ ATS Score Engine
+- Transparent rule-based ATS scoring
+- Category-wise score breakdown
+- Resume quality feedback
+- Personalized recommendations
+- JSON score export
 
-### Scoring Categories
-- Skill Match — 40
-- Education — 15
-- Experience — 20
-- Projects — 10
-- Certifications — 10
-- Resume Completeness — 5
+### ATS Categories
+- Skill Match (40)
+- Experience (20)
+- Education (15)
+- Projects (10)
+- Certifications (10)
+- Resume Completeness (5)
 
-### Output
-The system returns:
-- Overall ATS score out of 100.
-- Category-wise breakdown.
-- Feedback messages.
-- Actionable recommendations.
-- JSON export for later use.
+## 🏆 Candidate Ranking
+- Upload multiple resumes
+- Compare candidates automatically
+- Rank candidates by ATS score
+- Identify the best candidate
+- Export ranking results
 
----
+## 🖥 Streamlit Dashboard
+- Interactive interface
+- Resume upload
+- Job description input
+- ATS summary cards
+- Ranking dashboard
+- Feedback & recommendations
 
-## ✨ Features
-
-### 📄 Resume Parsing
-- Upload PDF resumes.
-- Extract resume text.
-- Preview extracted text.
-- Download extracted text.
-- View character count and word count.
-
-### 🧠 Skill Extraction
-- Detect technical skills from resume text.
-- Display detected skills as badges.
-- Compare extracted text with the skills database.
-- Save detected skills to JSON.
-
-### 🔎 Resume Matching
-- Compare resume skills against job description skills.
-- Identify matched and missing skills.
-- Generate a match score.
-- Provide matching recommendations.
-
-### ⭐ ATS Scoring
-- Calculate an overall ATS score.
-- Use weighted rule-based scoring.
-- Break down score by category.
-- Generate resume feedback.
-- Export ATS results as JSON.
-
-### 🖥 Streamlit Dashboard
-- Upload and parse resumes.
-- Show metrics and summary cards.
-- Display match score and ATS score.
-- Show score breakdown, feedback, and recommendations.
+## ☁ Deployment
+- Streamlit Cloud deployment
+- Docker container support
+- Portable local development
 
 ---
 
-## 📊 Current Workflow
+# 📊 Workflow
 
 ```text
-PDF Resume
-    │
-    ▼
+PDF Resume(s)
+      │
+      ▼
 Resume Parser
-    │
-    ▼
+      │
+      ▼
 NLP Preprocessing
-    │
-    ▼
+      │
+      ▼
 Skill Extraction
-    │
-    ▼
+      │
+      ▼
 Resume-to-Job Matching
-    │
-    ▼
+      │
+      ▼
 ATS Score Prediction
-    │
-    ▼
-Dashboard + JSON Export
+      │
+      ▼
+Candidate Ranking
+      │
+      ▼
+Interactive Dashboard
+      │
+      ▼
+JSON Export
+      │
+      ▼
+Docker & Streamlit Deployment
 ```
 
 ---
 
-## 🖥 Current Interface
-
-- Upload Resume.
-- Parse Resume.
-- Preview Extracted Text.
-- Display Detected Skills.
-- Compare Resume with Job Description.
-- Show Match Score.
-- Show ATS Score.
-- Display Score Breakdown.
-- Show Feedback and Recommendations.
-- Export Results to JSON.
-
----
-
-## 🛠 Tech Stack
+# 🛠 Tech Stack
 
 ### Programming
 - Python
 
 ### NLP
 - NLTK
-- spaCy planned
 
 ### PDF Processing
 - pdfplumber
@@ -184,16 +136,26 @@ Dashboard + JSON Export
 ### Testing
 - pytest
 
+### Deployment
+- Streamlit Community Cloud
+- Docker
+
+### Version Control
+- Git
+- GitHub
+
 ---
 
-## 📂 Project Structure
+# 📂 Project Structure
 
 ```text
 ai-resume-screening-system/
 │
 ├── app.py
-├── README.md
+├── Dockerfile
+├── .dockerignore
 ├── requirements.txt
+├── README.md
 │
 ├── data/
 │   ├── raw/
@@ -201,12 +163,15 @@ ai-resume-screening-system/
 │   ├── sample_resumes/
 │   └── scores/
 │
+├── outputs/
+│
 ├── src/
 │   ├── parser.py
 │   ├── preprocessing.py
 │   ├── skill_extractor.py
 │   ├── matcher.py
 │   ├── ats_score.py
+│   ├── ranking.py
 │   └── config.py
 │
 ├── tests/
@@ -215,82 +180,102 @@ ai-resume-screening-system/
 
 ---
 
-## 📂 Testing Summary
+# ✅ Testing
 
-| Resume Type | Status |
-|--------------|--------|
-| Excellent Resume | ✅ |
-| Average Resume | ✅ |
-| Poor Resume | ✅ |
-| Missing Education | ✅ |
-| Missing Experience | ✅ |
-| Empty Resume | ✅ |
+Current automated test coverage includes:
 
----
+- Resume Parser
+- Resume Matcher
+- ATS Score Engine
+- Candidate Ranking
 
-## 📅 Development Roadmap
-
-| Version | Module | Status |
-|--------|--------|--------|
-| v0.1 | Project Planning | ✅ |
-| v0.2 | Resume Parsing Engine | ✅ |
-| v0.3 | NLP Preprocessing Pipeline | ✅ |
-| v0.4 | Skill Extraction Engine | ✅ |
-| v0.5 | Resume-to-Job Matching Engine | ✅ |
-| v0.6 | ATS Score Prediction Engine | ✅ |
-| v0.7 | Candidate Ranking System | ⏳ |
-| v0.8 | OCR Support for Scanned Resumes | ⏳ |
-| v1.0 | Final Release | 🚀 |
+**30 Automated Tests Passing**
 
 ---
 
-## 🚀 Getting Started
+# 🚀 Getting Started
 
-### Clone the repository
+## Clone Repository
+
 ```bash
 git clone https://github.com/Momina29311/ai-resume-screening-system.git
 ```
 
-### Install dependencies
+## Install Requirements
+
 ```bash
 pip install -r requirements.txt
 ```
 
-### Run the app
+## Run Application
+
 ```bash
 streamlit run app.py
 ```
 
-## 🐳 Docker Support
+---
 
-This project can now run inside a Docker container.
+# 🐳 Docker
 
-### Build Docker Image
+## Build Docker Image
+
 ```bash
-docker build -t resume-screening .
+docker build -t resumeiq .
 ```
 
-### Run Container
+## Run Container
+
 ```bash
-docker run -p 8501:8501 resume-screening
+docker run -p 8501:8501 resumeiq
 ```
 
-The application will be available at:
+Open:
+
+```
 http://localhost:8501
----
-
-## 📈 Future Enhancements
-
-- Cloud deployment.
+```
 
 ---
 
-## 👩‍💻 Author
+# 📅 Development Roadmap
+
+| Version | Module | Status |
+|----------|--------|--------|
+| v0.1 | Project Planning | ✅ |
+| v0.2 | Resume Parsing Engine | ✅ |
+| v0.3 | NLP Preprocessing | ✅ |
+| v0.4 | Skill Extraction | ✅ |
+| v0.5 | Resume Matching | ✅ |
+| v0.6 | ATS Score Prediction | ✅ |
+| v0.7 | Candidate Ranking | ✅ |
+| v0.8 | Streamlit Cloud Deployment | ✅ |
+| v0.9 | Docker Containerization | ✅ |
+| v1.0 | Explainable AI + ML Ranking | 🚧 |
+
+---
+
+# 📈 Future Enhancements
+
+- Explainable AI (XAI)
+- Machine Learning–based ATS prediction
+- OCR support for scanned resumes
+- Semantic skill matching
+- Resume database
+- Recruiter dashboard
+- Authentication
+- REST API
+- GitHub Actions (CI/CD)
+- MLOps pipeline
+- Model deployment
+
+---
+
+# 👩‍💻 Author
 
 **Momina Zaheer**
 
-Computer Science Student | Aspiring Data Scientist | Aspiring AI & Machine Learning Engineer
+Computer Science Student | AI & Data Science Enthusiast
 
 Building AI projects publicly to learn, improve, and share the journey.
 
-⭐ If you found this project interesting, consider giving it a star!
+⭐ If you found this project useful, consider giving it a star!
