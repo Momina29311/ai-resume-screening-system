@@ -56,4 +56,4 @@ def save_extracted_text(pdf_path: str, output_dir: str = "data/processed") -> st
     output_path = Path(output_dir) / f"{Path(pdf_path).stem}.txt"
     write_text(str(output_path), text)
     log_message(f"Saved extracted text to {output_path}")
-    return str(output_path)    
+    
