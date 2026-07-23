@@ -1,6 +1,12 @@
 __pycache__/
 *.pyc
-data/resumes/
+# Ignore all resumes
+data/resumes/*
+
+# Keep only test files
+!data/resumes/.gitkeep
+!data/resumes/empty.pdf
+!data/resumes/simple_ats_resume.pdf
 data/processed/
 data/extracted_skills/
 data/matches/
