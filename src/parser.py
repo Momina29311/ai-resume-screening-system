@@ -13,6 +13,19 @@ def validate_pdf(pdf_path: str) -> bool:
     path = Path(pdf_path)
     return path.is_file() and path.suffix.lower() == ".pdf"
 
+def extract_text_from_pdf(pdf_path: str) -> str:
+    if not validate_pdf(pdf_path):
+        raise FileNotFoundError(f"Invalid PDF path: {pdf_path}")
+
+    reader = PdfReader(pdf_path)
+    text_parts = []
+
+    for page in reader.pages:
+        page_text = page.extract_text() or ""
+        if page_text.strip():
+            text_parts.append(page_text)
+
+    return "\n".join(text_parts).strip()
 
 def extract_pages(pdf_path: str) -> list[str]:
     pages: list[str] = []
@@ -20,12 +33,6 @@ def extract_pages(pdf_path: str) -> list[str]:
         for page in pdf.pages:
             pages.append(page.extract_text() or "")
     return pages
-
-
-def extract_text_from_pdf(pdf_path: str) -> str:
-    if not validate_pdf(pdf_path):
-        raise FileNotFoundError(f"Invalid PDF path: {pdf_path}")
-
     try:
         logger.info("Reading resume: %s", pdf_path)
 
