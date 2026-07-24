@@ -1,6 +1,8 @@
 from pathlib import Path
 import tempfile
 import json
+import logging
+from logging.handlers import RotatingFileHandler
 
 import pandas as pd
 import streamlit as st
@@ -10,7 +12,26 @@ from src.parser import extract_text_from_pdf, save_extracted_text
 from src.skill_extractor import extract_skills, save_skills, load_skills
 from src.matcher import match_resume_to_job, save_match_result
 from src.ranking import rank_candidates, save_ranking_results
+from config import LOGS_FOLDER, LOG_FILE, LOG_LEVEL
 
+LOGS_FOLDER.mkdir(parents=True, exist_ok=True)
+
+logger = logging.getLogger("resumeiq")
+logger.setLevel(getattr(logging, LOG_LEVEL.upper(), logging.INFO))
+logger.propagate = False
+
+if not logger.handlers:
+    file_handler = RotatingFileHandler(LOG_FILE, maxBytes=1_000_000, backupCount=3)
+    file_handler.setLevel(getattr(logging, LOG_LEVEL.upper(), logging.INFO))
+
+    formatter = logging.Formatter(
+        "%(asctime)s %(levelname)s %(message)s",
+        datefmt="%Y-%m-%d %H:%M:%S",
+    )
+    file_handler.setFormatter(formatter)
+    logger.addHandler(file_handler)
+
+logger.info("Application started")
 
 st.set_page_config(page_title="Resume Screening System", layout="wide")
 st.title("Resume Screening System")
@@ -55,6 +76,7 @@ with tab1:
         st.session_state.parsed_resumes = []
         st.session_state.ranking_results = []
         st.session_state.job_description = ""
+        logger.info("State cleared by user")
         st.rerun()
 
     st.subheader("Job Description")
@@ -74,27 +96,39 @@ with tab1:
             parsed_resumes = []
 
             for uploaded_file in uploaded_files:
+                logger.info("Resume upload received: %s", uploaded_file.name)
                 with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp:
                     tmp.write(uploaded_file.getbuffer())
                     tmp_path = tmp.name
 
                 try:
-                    text = extract_text_from_pdf(tmp_path)
-                    skills_db = st.session_state.skills_db
-                    skills = extract_skills(text, skills_db)
+                    try:
+                        text = extract_text_from_pdf(tmp_path)
+                        if not text or not text.strip():
+                            raise ValueError("Empty resume text extracted")
 
-                    save_path = save_extracted_text(tmp_path)
-                    skills_path = save_skills(uploaded_file.name, skills)
+                        skills_db = st.session_state.skills_db
+                        skills = extract_skills(text, skills_db)
 
-                    parsed_resumes.append(
-                        {
-                            "name": uploaded_file.name,
-                            "text": text,
-                            "skills": skills,
-                            "save_path": save_path,
-                            "skills_path": skills_path,
-                        }
-                    )
+                        save_path = save_extracted_text(tmp_path)
+                        skills_path = save_skills(uploaded_file.name, skills)
+
+                        parsed_resumes.append(
+                            {
+                                "name": uploaded_file.name,
+                                "text": text,
+                                "skills": skills,
+                                "save_path": save_path,
+                                "skills_path": skills_path,
+                            }
+                        )
+
+                        logger.info("Parsed resume: %s", uploaded_file.name)
+                        logger.info("Text extraction completed: %s", uploaded_file.name)
+                        logger.info("Skills extracted: %s | count=%s", uploaded_file.name, len(skills))
+                    except Exception as e:
+                        logger.exception("Error during parsing for %s", uploaded_file.name)
+                        st.error(f"Failed to parse {uploaded_file.name}: {e}")
                 finally:
                     Path(tmp_path).unlink(missing_ok=True)
 
@@ -102,7 +136,10 @@ with tab1:
             st.session_state.resume_text = parsed_resumes[0]["text"] if parsed_resumes else ""
             st.session_state.resume_skills = parsed_resumes[0]["skills"] if parsed_resumes else []
 
-            st.success("Resumes parsed successfully.")
+            if parsed_resumes:
+                st.success("Resumes parsed successfully.")
+            else:
+                st.warning("No resumes were parsed successfully.")
 
             for resume in parsed_resumes:
                 with st.expander(f"Preview: {resume['name']}", expanded=False):
@@ -156,72 +193,82 @@ with tab2:
     if compare_btn:
         if not st.session_state.parsed_resumes:
             st.warning("Please parse the resumes first.")
+            logger.warning("Ranking attempted without parsed resumes")
         elif not st.session_state.job_description.strip():
             st.warning("Please paste a job description first.")
+            logger.warning("Ranking attempted without job description")
         else:
-            ranked_results = rank_candidates(
-                st.session_state.parsed_resumes,
-                st.session_state.job_description,
-                st.session_state.skills_db,
-            )
-
-            st.session_state.ranking_results = ranked_results
-            save_path = save_ranking_results(ranked_results)
-
-            st.subheader("🏆 Candidate Rankings")
-
-            if ranked_results:
-                ranking_df = pd.DataFrame(
-                    [
-                        {
-                            "Rank": i + 1,
-                            "Candidate": item["name"],
-                            "ATS Score": item["ats_score"],
-                            "Match %": item["match_percent"],
-                        }
-                        for i, item in enumerate(ranked_results)
-                    ]
+            try:
+                ranked_results = rank_candidates(
+                    st.session_state.parsed_resumes,
+                    st.session_state.job_description,
+                    st.session_state.skills_db,
                 )
 
-                st.dataframe(ranking_df, use_container_width=True, hide_index=True)
+                st.session_state.ranking_results = ranked_results
+                save_path = save_ranking_results(ranked_results)
 
-                best = ranked_results[0]
-                st.subheader("⭐ Best Candidate")
-                top_col1, top_col2, top_col3 = st.columns(3)
-                top_col1.metric("Candidate", best["name"])
-                top_col2.metric("ATS Score", best["ats_score"])
-                top_col3.metric("Match %", f"{best['match_percent']}%")
+                logger.info("Candidate ranking completed")
+                logger.info("JSON exported: %s", save_path)
 
-                st.success("Recommendation: Highly recommended for interview.")
+                st.subheader("🏆 Candidate Rankings")
 
-                st.subheader("Candidate Details")
-                for item in ranked_results:
-                    with st.expander(f"{item['rank']}. {item['name']}"):
-                        c1, c2, c3 = st.columns(3)
-                        c1.metric("ATS Score", item["ats_score"])
-                        c2.metric("Match %", f"{item['match_percent']}%")
-                        c3.metric("Matched Skills", len(item["matched_skills"]))
+                if ranked_results:
+                    ranking_df = pd.DataFrame(
+                        [
+                            {
+                                "Rank": i + 1,
+                                "Candidate": item["name"],
+                                "ATS Score": item["ats_score"],
+                                "Match %": item["match_percent"],
+                            }
+                            for i, item in enumerate(ranked_results)
+                        ]
+                    )
 
-                        st.write("**Matched Skills:**")
-                        st.write(", ".join(item["matched_skills"]) if item["matched_skills"] else "None")
+                    st.dataframe(ranking_df, use_container_width=True, hide_index=True)
 
-                        st.write("**Missing Skills:**")
-                        st.write(", ".join(item["missing_skills"]) if item["missing_skills"] else "None")
+                    best = ranked_results[0]
+                    st.subheader("⭐ Best Candidate")
+                    top_col1, top_col2, top_col3 = st.columns(3)
+                    top_col1.metric("Candidate", best["name"])
+                    top_col2.metric("ATS Score", best["ats_score"])
+                    top_col3.metric("Match %", f"{best['match_percent']}%")
 
-                        st.write("**Feedback:**")
-                        if item.get("feedback"):
-                            for fb in item["feedback"]:
-                                st.write(f"• {fb}")
-                        else:
-                            st.write("No feedback available.")
+                    st.success("Recommendation: Highly recommended for interview.")
 
-                        st.write("**Recommendations:**")
-                        if item.get("recommendations"):
-                            for rec in item["recommendations"]:
-                                st.write(f"• {rec}")
-                        else:
-                            st.write("No recommendations.")
+                    st.subheader("Candidate Details")
+                    for item in ranked_results:
+                        with st.expander(f"{item['rank']}. {item['name']}"):
+                            c1, c2, c3 = st.columns(3)
+                            c1.metric("ATS Score", item["ats_score"])
+                            c2.metric("Match %", f"{item['match_percent']}%")
+                            c3.metric("Matched Skills", len(item["matched_skills"]))
 
-                st.info(f"Saved ranking results to: {save_path}")
-            else:
-                st.warning("No ranking results were generated.")
+                            st.write("**Matched Skills:**")
+                            st.write(", ".join(item["matched_skills"]) if item["matched_skills"] else "None")
+
+                            st.write("**Missing Skills:**")
+                            st.write(", ".join(item["missing_skills"]) if item["missing_skills"] else "None")
+
+                            st.write("**Feedback:**")
+                            if item.get("feedback"):
+                                for fb in item["feedback"]:
+                                    st.write(f"• {fb}")
+                            else:
+                                st.write("No feedback available.")
+
+                            st.write("**Recommendations:**")
+                            if item.get("recommendations"):
+                                for rec in item["recommendations"]:
+                                    st.write(f"• {rec}")
+                            else:
+                                st.write("No recommendations.")
+
+                    st.info(f"Saved ranking results to: {save_path}")
+                else:
+                    st.warning("No ranking results were generated.")
+                    logger.warning("Ranking completed but returned no results")
+            except Exception as e:
+                logger.exception("Error during candidate ranking")
+                st.error(f"Ranking failed: {e}")

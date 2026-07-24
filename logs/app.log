@@ -1,0 +1,15 @@
+2026-07-24 17:14:47 INFO Application started
+2026-07-24 17:14:56 INFO Application started
+2026-07-24 17:15:03 INFO Application started
+2026-07-24 17:15:13 INFO Application started
+2026-07-24 17:15:13 INFO Resume upload received: AI_ML_Engineer_Resume_Maya_Chen.pdf
+2026-07-24 17:15:13 INFO Parsed resume: AI_ML_Engineer_Resume_Maya_Chen.pdf
+2026-07-24 17:15:13 INFO Text extraction completed: AI_ML_Engineer_Resume_Maya_Chen.pdf
+2026-07-24 17:15:13 INFO Skills extracted: AI_ML_Engineer_Resume_Maya_Chen.pdf | count=13
+2026-07-24 17:15:13 INFO Resume upload received: Data_Analyst_Resume_Jordan_Reyes.pdf
+2026-07-24 17:15:13 INFO Parsed resume: Data_Analyst_Resume_Jordan_Reyes.pdf
+2026-07-24 17:15:13 INFO Text extraction completed: Data_Analyst_Resume_Jordan_Reyes.pdf
+2026-07-24 17:15:13 INFO Skills extracted: Data_Analyst_Resume_Jordan_Reyes.pdf | count=9
+2026-07-24 17:15:18 INFO Application started
+2026-07-24 17:15:18 INFO Candidate ranking completed
+2026-07-24 17:15:18 INFO JSON exported: outputs/ranking_results.json

@@ -1,0 +1,62 @@
+[
+  {
+    "name": "AI_ML_Engineer_Resume_Maya_Chen.pdf",
+    "ats_score": 69,
+    "match_percent": 64,
+    "matched_skills": [
+      "docker",
+      "git",
+      "machine learning",
+      "nlp",
+      "python",
+      "pytorch",
+      "scikit-learn",
+      "sql",
+      "tensorflow"
+    ],
+    "missing_skills": [
+      "data analysis",
+      "data visualization",
+      "numpy",
+      "pandas",
+      "streamlit"
+    ],
+    "feedback": [
+      "Improve skill alignment with the job description."
+    ],
+    "recommendations": [
+      "Highlight matched skills more clearly in your resume."
+    ],
+    "rank": 1
+  },
+  {
+    "name": "Data_Analyst_Resume_Jordan_Reyes.pdf",
+    "ats_score": 40,
+    "match_percent": 35,
+    "matched_skills": [
+      "git",
+      "numpy",
+      "pandas",
+      "python",
+      "sql"
+    ],
+    "missing_skills": [
+      "data analysis",
+      "data visualization",
+      "docker",
+      "machine learning",
+      "nlp",
+      "pytorch",
+      "scikit-learn",
+      "streamlit",
+      "tensorflow"
+    ],
+    "feedback": [
+      "Improve skill alignment with the job description."
+    ],
+    "recommendations": [
+      "Highlight matched skills more clearly in your resume."
+    ],
+    "rank": 2
+  }
+]
