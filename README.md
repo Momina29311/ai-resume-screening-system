@@ -30,42 +30,9 @@ https://momina-resumeiq.streamlit.app
 
 # ✨ Key Features
 
-## 📄 Resume Parsing
-- Upload one or multiple PDF resumes
-- Extract resume text
-- Resume preview
-- Download extracted text
-- Character & word statistics
-
----
-
-## 🧠 NLP Preprocessing
-- Text cleaning
-- Normalization
-- Token preparation
-- Ready for downstream analysis
-
----
-
-## 🎯 Skill Extraction
-- Detect technical skills
-- Skill badge visualization
-- Skill comparison against database
-- Export extracted skills as JSON
-
----
-
-## 🔎 Resume Matching
-- Compare resumes with job descriptions
-- Detect matched skills
-- Detect missing skills
-- Calculate Match Percentage
-
----
-
 ## ⭐ ATS Score Engine
 
-Transparent rule-based ATS scoring with weighted categories.
+Transparent rule-based ATS scoring with weighted categories — no black box, just clear math recruiters and candidates can both trust.
 
 ### ATS Breakdown
 
@@ -99,6 +66,43 @@ Transparent rule-based ATS scoring with weighted categories.
 
 ---
 
+## 🔎 Resume Matching
+
+- Compare resumes with job descriptions
+- Detect matched skills
+- Detect missing skills
+- Calculate Match Percentage
+
+---
+
+## 🎯 Skill Extraction
+
+- Detect technical skills
+- Skill badge visualization
+- Skill comparison against database
+- Export extracted skills as JSON
+
+---
+
+## 📄 Resume Parsing
+
+- Upload one or multiple PDF resumes
+- Extract resume text
+- Resume preview
+- Download extracted text
+- Character & word statistics
+
+---
+
+## 🧠 NLP Preprocessing
+
+- Text cleaning
+- Normalization
+- Token preparation
+- Ready for downstream analysis
+
+---
+
 ## 📊 Interactive Dashboard
 
 - Resume Upload
@@ -108,6 +112,18 @@ Transparent rule-based ATS scoring with weighted categories.
 - Resume Feedback
 - Candidate Ranking
 - Export Results
+
+---
+
+## ⚙️ Configuration & Logging
+
+Centralized, production-style config management that keeps ResumeIQ predictable, debuggable, and easy to extend.
+
+- Centralized settings via `src/config.py` — one source of truth for scoring weights, file paths, and app parameters
+- Environment-ready configuration for local, Docker, and cloud deployments
+- Structured logging across parsing, matching, scoring, and ranking modules
+- Easier debugging with traceable logs at every pipeline stage
+- Clean separation of config from logic for faster iteration and maintenance
 
 ---
 
