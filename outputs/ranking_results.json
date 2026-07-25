@@ -1,62 +1,92 @@
 [
   {
     "name": "AI_ML_Engineer_Resume_Maya_Chen.pdf",
-    "ats_score": 69,
-    "match_percent": 64,
+    "ats_score": 90,
+    "match_percent": 90,
+    "years_experience": 0,
     "matched_skills": [
+      "aws",
       "docker",
       "git",
-      "machine learning",
-      "nlp",
-      "python",
-      "pytorch",
-      "scikit-learn",
-      "sql",
-      "tensorflow"
-    ],
-    "missing_skills": [
-      "data analysis",
-      "data visualization",
-      "numpy",
-      "pandas",
-      "streamlit"
-    ],
-    "feedback": [
-      "Improve skill alignment with the job description."
-    ],
-    "recommendations": [
-      "Highlight matched skills more clearly in your resume."
-    ],
-    "rank": 1
-  },
-  {
-    "name": "Data_Analyst_Resume_Jordan_Reyes.pdf",
-    "ats_score": 40,
-    "match_percent": 35,
-    "matched_skills": [
-      "git",
-      "numpy",
-      "pandas",
+      "natural language processing",
       "python",
       "sql"
     ],
     "missing_skills": [
-      "data analysis",
-      "data visualization",
-      "docker",
-      "machine learning",
-      "nlp",
-      "pytorch",
-      "scikit-learn",
-      "streamlit",
-      "tensorflow"
+      "streamlit"
     ],
+    "missing_required_skills": [],
+    "missing_preferred_skills": [
+      "streamlit"
+    ],
+    "ats_breakdown": {
+      "skills": 36,
+      "experience": 14,
+      "education": 15,
+      "projects": 10,
+      "certifications": 8,
+      "completeness": 7,
+      "total": 90
+    },
+    "recommendation_level": "Highly Recommended",
     "feedback": [
-      "Improve skill alignment with the job description."
+      "Strong overall profile with excellent alignment to the job description.",
+      "Matched strengths include: aws, docker, git, natural language processing, python.",
+      "Suitable for interview after technical review."
     ],
     "recommendations": [
-      "Highlight matched skills more clearly in your resume."
+      "Consider highlighting streamlit, listed as a preferred skill."
     ],
-    "rank": 2
+    "rank": 1,
+    "score_gap_from_best": 0
+  },
+  {
+    "name": "Data_Analyst_Resume_Jordan_Reyes.pdf",
+    "ats_score": 75,
+    "match_percent": 54,
+    "years_experience": 0,
+    "matched_skills": [
+      "git",
+      "python",
+      "sql"
+    ],
+    "missing_skills": [
+      "docker",
+      "aws",
+      "natural language processing",
+      "streamlit"
+    ],
+    "missing_required_skills": [
+      "docker"
+    ],
+    "missing_preferred_skills": [
+      "aws",
+      "natural language processing",
+      "streamlit"
+    ],
+    "ats_breakdown": {
+      "skills": 21,
+      "experience": 14,
+      "education": 15,
+      "projects": 10,
+      "certifications": 8,
+      "completeness": 7,
+      "total": 75
+    },
+    "recommendation_level": "Not Recommended",
+    "feedback": [
+      "Solid candidate with good alignment, but a few gaps remain.",
+      "Matched strengths include: git, python, sql.",
+      "Missing required skills: docker.",
+      "Needs improvement before recruiter shortlist."
+    ],
+    "recommendations": [
+      "Add docker experience to the resume \u2014 this is a required skill.",
+      "Consider highlighting aws, listed as a preferred skill.",
+      "Consider highlighting natural language processing, listed as a preferred skill.",
+      "Include measurable project outcomes."
+    ],
+    "rank": 2,
+    "score_gap_from_best": 15
   }
 ]
