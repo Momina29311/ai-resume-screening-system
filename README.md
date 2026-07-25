@@ -1,6 +1,6 @@
 # 🚀 ResumeIQ – AI-Powered Resume Screening System
 
-[![Version](https://img.shields.io/badge/version-v1.0-blue.svg)](https://github.com/Momina29311/ai-resume-screening-system)
+[![Version](https://img.shields.io/badge/version-v1.1-blue.svg)](https://github.com/Momina29311/ai-resume-screening-system)
 [![Status](https://img.shields.io/badge/status-active%20development-orange.svg)](https://github.com/Momina29311/ai-resume-screening-system)
 [![Python](https://img.shields.io/badge/python-3.14+-3776AB.svg?logo=python&logoColor=white)](https://www.python.org/)
 [![Streamlit](https://img.shields.io/badge/streamlit-live-red.svg?logo=streamlit&logoColor=white)](https://streamlit.io/)
@@ -12,11 +12,11 @@
 
 # 📄 ResumeIQ
 
-ResumeIQ is an AI-powered Resume Screening System that automates the early stages of recruitment by parsing resumes, extracting technical skills, comparing candidates against job descriptions, calculating ATS scores, ranking applicants, and providing actionable feedback through an interactive Streamlit dashboard.
+ResumeIQ is an AI-powered Resume Screening System that automates early-stage recruitment by parsing resumes, extracting technical skills, comparing candidates against job descriptions, calculating ATS scores, ranking applicants, and presenting recruiter-friendly hiring insights through an interactive dashboard.
 
-The project combines NLP techniques, rule-based intelligence, automated testing, Docker containerization, cloud deployment, and GitHub Actions CI to simulate a production-ready AI application.
+The project combines Natural Language Processing (NLP), rule-based AI, automated testing, Docker containerization, cloud deployment, centralized configuration, logging, and CI/CD to simulate a production-ready AI application.
 
-Built publicly as part of my Machine Learning & Data Science journey.
+Built publicly as part of my Machine Learning & AI Engineering journey.
 
 ---
 
@@ -28,69 +28,15 @@ https://momina-resumeiq.streamlit.app
 
 ---
 
-# ✨ Key Features
-
-## ⭐ ATS Score Engine
-
-Transparent rule-based ATS scoring with weighted categories — no black box, just clear math recruiters and candidates can both trust.
-
-### ATS Breakdown
-
-| Category | Weight |
-|-----------|---------|
-| Skill Match | 40 |
-| Experience | 20 |
-| Education | 15 |
-| Projects | 10 |
-| Certifications | 10 |
-| Resume Completeness | 5 |
-
-### Output
-
-- Overall ATS Score
-- Category-wise Breakdown
-- Resume Feedback
-- Personalized Recommendations
-- JSON Export
-
----
-
-## 🏆 Candidate Ranking
-
-- Upload multiple resumes
-- Rank candidates automatically
-- Best candidate recommendation
-- Candidate comparison
-- Ranking table
-- JSON export
-
----
-
-## 🔎 Resume Matching
-
-- Compare resumes with job descriptions
-- Detect matched skills
-- Detect missing skills
-- Calculate Match Percentage
-
----
-
-## 🎯 Skill Extraction
-
-- Detect technical skills
-- Skill badge visualization
-- Skill comparison against database
-- Export extracted skills as JSON
-
----
+# ✨ Core Features
 
 ## 📄 Resume Parsing
 
 - Upload one or multiple PDF resumes
-- Extract resume text
+- Resume text extraction
 - Resume preview
-- Download extracted text
 - Character & word statistics
+- Download extracted text
 
 ---
 
@@ -103,27 +49,107 @@ Transparent rule-based ATS scoring with weighted categories — no black box, ju
 
 ---
 
-## 📊 Interactive Dashboard
+## 🎯 Skill Extraction
 
-- Resume Upload
-- Job Description Input
-- ATS Summary Cards
-- Skill Analysis
-- Resume Feedback
-- Candidate Ranking
-- Export Results
+- Detect technical skills
+- Skill badge visualization
+- Skill comparison against database
+- JSON export
 
 ---
 
-## ⚙️ Configuration & Logging
+## 🔎 Resume ↔ Job Matching
 
-Centralized, production-style config management that keeps ResumeIQ predictable, debuggable, and easy to extend.
+- Compare resumes against job descriptions
+- Identify matched skills
+- Identify missing skills
+- Calculate Match Percentage
 
-- Centralized settings via `src/config.py` — one source of truth for scoring weights, file paths, and app parameters
-- Environment-ready configuration for local, Docker, and cloud deployments
-- Structured logging across parsing, matching, scoring, and ranking modules
-- Easier debugging with traceable logs at every pipeline stage
-- Clean separation of config from logic for faster iteration and maintenance
+---
+
+## ⭐ ATS Score Engine
+
+Transparent rule-based ATS scoring with explainable weighted categories.
+
+### ATS Categories
+
+| Category | Weight |
+|-----------|---------|
+| Skill Match | 40 |
+| Experience | 20 |
+| Education | 15 |
+| Projects | 10 |
+| Certifications | 10 |
+| Resume Completeness | 5 |
+
+### Output
+
+- ATS Score
+- Category Breakdown
+- Resume Feedback
+- Improvement Suggestions
+- JSON Export
+
+---
+
+## 🏆 Candidate Ranking
+
+- Upload multiple resumes
+- Automatic candidate ranking
+- ATS-based sorting
+- Top candidate recommendation
+- Candidate comparison
+- Ranking table
+- CSV & JSON export
+
+---
+
+## 📊 Recruiter Hiring Insights (NEW)
+
+Recruiters can now move beyond individual resumes and analyze the entire hiring pipeline.
+
+### Hiring Analytics
+
+- Average ATS Score
+- Average Match Percentage
+- Candidate Statistics
+- Skill Gap Analysis
+- Recommendation Distribution
+- ATS Score Distribution
+
+These insights help recruiters quickly understand candidate quality and identify the most common missing skills across applicants.
+
+---
+
+## 🖥 Interactive Recruiter Dashboard
+
+The dashboard provides an end-to-end hiring workflow.
+
+### Dashboard Modules
+
+- Resume Upload
+- Resume Parsing
+- Skill Analysis
+- Job Description Matching
+- ATS Score Dashboard
+- Candidate Ranking
+- Hiring Insights
+- Candidate Comparison
+- Feedback & Recommendations
+- JSON & CSV Export
+
+---
+
+## ⚙ Configuration & Logging
+
+ResumeIQ includes centralized configuration and application-wide logging.
+
+- Centralized configuration (`config.py`)
+- Configurable ATS weights
+- Environment-ready settings
+- Structured logging
+- Easier debugging
+- Cleaner architecture
 
 ---
 
@@ -131,7 +157,7 @@ Centralized, production-style config management that keeps ResumeIQ predictable,
 
 - Streamlit Community Cloud
 - Docker Container
-- Local Development Support
+- Local Development
 
 ---
 
@@ -141,49 +167,49 @@ GitHub Actions automatically:
 
 - Install dependencies
 - Run automated tests
-- Verify project builds successfully
-- Validate every push to the repository
+- Validate builds
+- Verify every push
 
 ---
 
-# 📊 Complete Workflow
+# 📊 Complete ResumeIQ Workflow
 
 ```text
-                 PDF Resume(s)
-                       │
-                       ▼
-              Resume Parsing Engine
-                       │
-                       ▼
-              NLP Preprocessing
-                       │
-                       ▼
-               Skill Extraction
-                       │
-                       ▼
-            Resume ↔ Job Matching
-                       │
-                       ▼
-             ATS Score Calculation
-                       │
-                       ▼
-             Candidate Ranking
-                       │
-                       ▼
-          Feedback & Recommendations
-                       │
-                       ▼
-             Interactive Dashboard
-                       │
-          ┌────────────┴────────────┐
-          ▼                         ▼
-     JSON Export          Streamlit Deployment
-                                    │
-                                    ▼
-                           Docker Container
-                                    │
-                                    ▼
-                          GitHub Actions CI
+             PDF Resume(s)
+                    │
+                    ▼
+          Resume Parsing Engine
+                    │
+                    ▼
+         NLP Preprocessing Layer
+                    │
+                    ▼
+           Skill Extraction Engine
+                    │
+                    ▼
+        Resume ↔ Job Description Matching
+                    │
+                    ▼
+         Explainable ATS Score Engine
+                    │
+                    ▼
+          Candidate Ranking System
+                    │
+                    ▼
+        Recruiter Hiring Insights
+                    │
+                    ▼
+       Interactive Streamlit Dashboard
+                    │
+          ┌─────────┴─────────┐
+          ▼                   ▼
+     JSON / CSV Export   Live Deployment
+                                   │
+                                   ▼
+                          Docker Container
+                                   │
+                                   ▼
+                           GitHub Actions CI
 ```
 
 ---
@@ -191,29 +217,41 @@ GitHub Actions automatically:
 # 🛠 Tech Stack
 
 ### Programming
+
 - Python
 
 ### NLP
+
 - NLTK
 
 ### PDF Processing
+
 - pdfplumber
 
-### Web Framework
+### Dashboard
+
 - Streamlit
 
+### Data Processing
+
+- Pandas
+
 ### Testing
-- pytest
+
+- Pytest
 
 ### Deployment
+
 - Streamlit Community Cloud
 - Docker
 
 ### DevOps
+
 - GitHub Actions
-- GitHub CI
+- CI/CD
 
 ### Version Control
+
 - Git
 - GitHub
 
@@ -229,44 +267,40 @@ ai-resume-screening-system/
 │       └── ci.yml
 │
 ├── app.py
+├── config.py
 ├── Dockerfile
-├── .dockerignore
-├── requirements.txt
 ├── README.md
+├── requirements.txt
 │
 ├── data/
-│   ├── raw/
-│   ├── processed/
-│   ├── sample_resumes/
-│   └── scores/
-│
+├── docs/
+├── logs/
+├── notebooks/
 ├── outputs/
-│
-├── src/
-│   ├── parser.py
-│   ├── preprocessing.py
-│   ├── skill_extractor.py
-│   ├── matcher.py
-│   ├── ats_score.py
-│   ├── ranking.py
-│   └── config.py
-│
 ├── tests/
-└── notebooks/
+│
+└── src/
+    ├── parser.py
+    ├── preprocessing.py
+    ├── skill_extractor.py
+    ├── matcher.py
+    ├── ats_score.py
+    ├── ranking.py
+    └── config.py
 ```
 
 ---
 
-# ✅ Testing
+# ✅ Automated Testing
 
-Current automated testing includes:
+Current automated tests cover:
 
-- Resume Parser
-- Resume Matcher
+- Resume Parsing
+- Resume Matching
 - ATS Score Engine
 - Candidate Ranking
 
-✅ 30 Automated Tests Passing
+✅ **30 Automated Tests Passing**
 
 ---
 
@@ -284,7 +318,7 @@ git clone https://github.com/Momina29311/ai-resume-screening-system.git
 pip install -r requirements.txt
 ```
 
-## Run Application
+## Run ResumeIQ
 
 ```bash
 streamlit run app.py
@@ -294,19 +328,19 @@ streamlit run app.py
 
 # 🐳 Docker
 
-## Build
+Build Image
 
 ```bash
 docker build -t resumeiq .
 ```
 
-## Run
+Run Container
 
 ```bash
 docker run -p 8501:8501 resumeiq
 ```
 
-Visit:
+Visit
 
 ```
 http://localhost:8501
@@ -319,26 +353,27 @@ http://localhost:8501
 | Version | Milestone | Status |
 |----------|-----------|--------|
 | v0.1 | Project Planning | ✅ |
-| v0.2 | Resume Parsing Engine | ✅ |
+| v0.2 | Resume Parsing | ✅ |
 | v0.3 | NLP Preprocessing | ✅ |
 | v0.4 | Skill Extraction | ✅ |
 | v0.5 | Resume Matching | ✅ |
 | v0.6 | ATS Score Engine | ✅ |
 | v0.7 | Candidate Ranking | ✅ |
-| v0.8 | Streamlit Cloud Deployment | ✅ |
-| v0.9 | Docker Containerization | ✅ |
-| v1.0 | GitHub Actions CI | ✅ |
+| v0.8 | Streamlit Deployment | ✅ |
+| v0.9 | Docker Support | ✅ |
+| v1.0 | GitHub Actions CI + Configuration & Logging | ✅ |
+| **v1.1** | **Recruiter Hiring Insights Dashboard** | ✅ |
 
 ---
 
-# 🚀 What's Next?
+# 🚀 Next Roadmap
 
 - Explainable AI (XAI)
-- Machine Learning–based ATS Prediction
+- Machine Learning-based ATS Prediction
 - Semantic Skill Matching
-- OCR Support for Scanned Resumes
-- Recruiter Dashboard
-- Authentication
+- OCR for Scanned Resumes
+- Resume Embeddings
+- Recruiter Authentication
 - REST API
 - MLOps Pipeline
 - Kubernetes Deployment
@@ -352,6 +387,6 @@ http://localhost:8501
 
 **Computer Science Student | AI & Data Science Enthusiast**
 
-I'm building AI projects publicly to strengthen my Machine Learning, Data Science, and Software Engineering skills while documenting the journey one day at a time.
+I'm building AI projects publicly to strengthen my Machine Learning, Data Science, AI Engineering, and Software Engineering skills while documenting the journey one day at a time.
 
-If you found this project useful, consider giving it a ⭐ and sharing your feedback!
+⭐ If you found ResumeIQ useful, consider giving the repository a **star** and sharing your feedback!
