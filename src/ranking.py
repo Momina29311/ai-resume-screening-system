@@ -232,11 +232,11 @@ def rank_candidates(parsed_resumes, job_description, skills_db):
         resume_set = {normalize_skill(s) for s in resume_skills}
         # Semantic + keyword matching
         match_result = match_resume_to_job(
-    resume_skills=resume_skills,
-    job_skills=job_skills,
-    resume_text=resume_text,
-    job_description_text=job_description,
-)
+            resume_skills=resume_skills,
+            job_skills=job_skills,
+            resume_text=resume_text,
+            job_description_text=job_description,
+        )
 
         semantic_score = match_result["semantic_match_percent"]
         semantic_label = match_result["semantic_match_label"]
@@ -250,15 +250,22 @@ def rank_candidates(parsed_resumes, job_description, skills_db):
             resume_skills,
             required_skills,
             preferred_skills,
-)
+        )
 
-# 70% keyword + 30% semantic
+        # 70% keyword + 30% semantic, used to feed the ATS "skills" sub-score
         match_percent = round(
-            keyword_score * 0.7 + 
+            keyword_score * 0.7 +
             semantic_score * 0.3
-)       
+        )
+
         years_experience = extract_years_experience(resume_text)
         ats_score, breakdown = calculate_ats_score(match_percent, resume_text, years_experience)
+
+        # Final ranking score blends the overall ATS score with the raw semantic
+        # similarity, so a candidate that reads as a strong conceptual fit for
+        # the role (even with slightly different wording/skills) can outrank
+        # a keyword-only match. Weighting: 70% ATS, 30% semantic.
+        final_score = round(ats_score * 0.7 + semantic_score * 0.3, 1)
 
         recommendation_level = get_recommendation_level(ats_score, match_percent)
         feedback = build_feedback(ats_score, match_percent, matched_skills, missing_required, years_experience)
@@ -280,16 +287,18 @@ def rank_candidates(parsed_resumes, job_description, skills_db):
                 "recommendations": suggestions,
                 "keyword_match_score": keyword_score,
                 "semantic_match_score": semantic_score,
+                "semantic_match_percent": semantic_score,
                 "semantic_match_label": semantic_label,
+                "final_score": final_score,
             }
         )
 
-    ranked = sorted(ranked, key=lambda x: x["ats_score"], reverse=True)
+    ranked = sorted(ranked, key=lambda x: x["final_score"], reverse=True)
 
-    best_score = ranked[0]["ats_score"] if ranked else 0
+    best_score = ranked[0]["final_score"] if ranked else 0
     for i, item in enumerate(ranked, start=1):
         item["rank"] = i
-        item["score_gap_from_best"] = best_score - item["ats_score"]
+        item["score_gap_from_best"] = round(best_score - item["final_score"], 1)
 
     return ranked
 
@@ -300,12 +309,16 @@ def compute_aggregate_insights(ranked_results):
         return {
             "avg_ats_score": 0,
             "avg_match_percent": 0,
+            "avg_semantic_match_percent": 0,
+            "highest_semantic_match_percent": 0,
             "top_missing_skills": [],
             "candidate_count": 0,
         }
 
     avg_ats = sum(r["ats_score"] for r in ranked_results) / len(ranked_results)
     avg_match = sum(r["match_percent"] for r in ranked_results) / len(ranked_results)
+    avg_semantic = sum(r.get("semantic_match_percent", 0) for r in ranked_results) / len(ranked_results)
+    highest_semantic = max((r.get("semantic_match_percent", 0) for r in ranked_results), default=0)
 
     missing_counter = {}
     for r in ranked_results:
@@ -317,6 +330,8 @@ def compute_aggregate_insights(ranked_results):
     return {
         "avg_ats_score": round(avg_ats, 1),
         "avg_match_percent": round(avg_match, 1),
+        "avg_semantic_match_percent": round(avg_semantic, 1),
+        "highest_semantic_match_percent": round(highest_semantic, 1),
         "top_missing_skills": top_missing,  # list of (skill, count)
         "candidate_count": len(ranked_results),
     }
@@ -336,6 +351,8 @@ def export_ranking_csv(ranked_results, output_path="outputs/ranking_results.csv"
         "name",
         "ats_score",
         "match_percent",
+        "semantic_match_percent",
+        "final_score",
         "years_experience",
         "recommendation_level",
         "matched_skills",
@@ -352,6 +369,8 @@ def export_ranking_csv(ranked_results, output_path="outputs/ranking_results.csv"
                     "name": item.get("name"),
                     "ats_score": item.get("ats_score"),
                     "match_percent": item.get("match_percent"),
+                    "semantic_match_percent": item.get("semantic_match_percent"),
+                    "final_score": item.get("final_score"),
                     "years_experience": item.get("years_experience"),
                     "recommendation_level": item.get("recommendation_level"),
                     "matched_skills": "; ".join(item.get("matched_skills", [])),

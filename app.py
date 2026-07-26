@@ -390,9 +390,9 @@ with tab2:
             st.session_state.loading = False
 
     ranked_results = st.session_state.ranking_results
+    visible_results = []
 
     if ranked_results:
-        # --- Filter / sort controls ---
         filt_col1, filt_col2, filt_col3 = st.columns([2, 1, 1])
         min_score = filt_col1.slider("Minimum ATS score", 0, 100, 0)
         rec_filter = filt_col2.multiselect(
@@ -400,18 +400,27 @@ with tab2:
             options=["Highly Recommended", "Consider", "Not Recommended"],
             default=[],
         )
-        sort_by = filt_col3.selectbox("Sort by", ["ATS Score", "Match %", "Years Experience"])
+        sort_by = filt_col3.selectbox(
+            "Sort by",
+            ["Final Score", "ATS Score", "Semantic Match", "Keyword Match", "Years Experience"],
+        )
 
         visible_results = [r for r in ranked_results if r["ats_score"] >= min_score]
         if rec_filter:
             visible_results = [r for r in visible_results if r["recommendation_level"] in rec_filter]
 
         sort_key_map = {
+            "Final Score": "final_score",
             "ATS Score": "ats_score",
-            "Match %": "match_percent",
+            "Semantic Match": "semantic_match_percent",
+            "Keyword Match": "match_percent",
             "Years Experience": "years_experience",
         }
-        visible_results = sorted(visible_results, key=lambda x: x[sort_key_map[sort_by]], reverse=True)
+        visible_results = sorted(
+            visible_results,
+            key=lambda x: x.get(sort_key_map[sort_by], 0),
+            reverse=True,
+        )
 
         st.subheader("🏆 Candidate Rankings")
         ranking_df = pd.DataFrame(
@@ -421,7 +430,8 @@ with tab2:
                     "Candidate": item["name"],
                     "ATS Score": item["ats_score"],
                     "Match %": item["match_percent"],
-                    "Semantic %": item.get("semantic_match_score", 0),
+                    "Semantic %": item.get("semantic_match_percent", 0),
+                    "Final Score": item.get("final_score", item["ats_score"]),
                     "Years Exp.": item.get("years_experience", 0),
                     "Recommendation": item["recommendation_level"],
                 }
@@ -432,53 +442,68 @@ with tab2:
 
         st.markdown("**ATS Score Comparison**")
         if visible_results:
-            chart_df = pd.DataFrame(
-                {item["name"]: item["ats_score"] for item in visible_results}.items(),
+            ats_chart_df = pd.DataFrame(
+                [(item["name"], item["ats_score"]) for item in visible_results],
                 columns=["Candidate", "ATS Score"],
             ).set_index("Candidate")
-            st.bar_chart(chart_df)
+            st.bar_chart(ats_chart_df)
 
-        dl_col1, dl_col2 = st.columns(2)
-        with dl_col1:
-            st.download_button(
-                "⬇️ Download JSON",
-                data=json.dumps(ranked_results, indent=2),
-                file_name="ranking_results.json",
-                mime="application/json",
-            )
-        with dl_col2:
-            csv_df = pd.DataFrame(
-                [
-                    {
-                        "Rank": item["rank"],
-                        "Candidate": item["name"],
-                        "ATS Score": item["ats_score"],
-                        "Match %": item["match_percent"],
-                        "Years Exp.": item.get("years_experience", 0),
-                        "Recommendation": item["recommendation_level"],
-                        "Matched Skills": "; ".join(item.get("matched_skills", [])),
-                        "Missing Required": "; ".join(item.get("missing_required_skills", [])),
-                    }
-                    for item in ranked_results
-                ]
-            )
-            st.download_button(
-                "⬇️ Download CSV",
-                data=csv_df.to_csv(index=False),
-                file_name="ranking_results.csv",
-                mime="text/csv",
-            )
+        st.markdown("**Semantic Match Comparison**")
+        if visible_results:
+            semantic_chart_df = pd.DataFrame(
+                [(item["name"], item.get("semantic_match_percent", 0)) for item in visible_results],
+                columns=["Candidate", "Semantic Match"],
+            ).set_index("Candidate")
+
+            if len(visible_results) >= 2:
+                st.bar_chart(semantic_chart_df)
+            else:
+                st.dataframe(semantic_chart_df, use_container_width=True)
+
+            dl_col1, dl_col2 = st.columns(2)
+            with dl_col1:
+                st.download_button(
+                    "⬇️ Download JSON",
+                    data=json.dumps(ranked_results, indent=2),
+                    file_name="ranking_results.json",
+                    mime="application/json",
+                )
+            with dl_col2:
+                csv_df = pd.DataFrame(
+                    [
+                        {
+                            "Rank": item["rank"],
+                            "Candidate": item["name"],
+                            "ATS Score": item["ats_score"],
+                            "Match %": item["match_percent"],
+                            "Semantic Match": item.get("semantic_match_percent", 0),
+                            "Final Score": item.get("final_score", item["ats_score"]),
+                            "Years Exp.": item.get("years_experience", 0),
+                            "Recommendation": item["recommendation_level"],
+                            "Matched Skills": "; ".join(item.get("matched_skills", [])),
+                            "Missing Required": "; ".join(item.get("missing_required_skills", [])),
+                        }
+                        for item in ranked_results
+                    ]
+                )
+                st.download_button(
+                    "⬇️ Download CSV",
+                    data=csv_df.to_csv(index=False),
+                    file_name="ranking_results.csv",
+                    mime="text/csv",
+                )
 
         if not visible_results:
             st.info("No candidates match the current filters.")
         else:
             best = visible_results[0]
             st.subheader("⭐ Top Candidate")
-            top_col1, top_col2, top_col3, top_col4 = st.columns(4)
+            top_col1, top_col2, top_col3, top_col4, top_col5 = st.columns(5)
             top_col1.metric("Candidate", best["name"])
             top_col2.metric("ATS Score", best["ats_score"])
-            top_col3.metric("Match %", f"{best['match_percent']}%")
-            top_col4.metric("Years Exp.", best.get("years_experience", 0))
+            top_col3.metric("Semantic Match", f"{best.get('semantic_match_percent', 0)}%")
+            top_col4.metric("Final Score", best.get("final_score", best["ats_score"]))
+            top_col5.metric("Years Exp.", best.get("years_experience", 0))
 
             rec_level = best.get("recommendation_level", "Recommended")
             feedback = " ".join(best.get("feedback", [])) if isinstance(best.get("feedback"), list) else best.get("feedback", "")
@@ -493,11 +518,12 @@ with tab2:
             st.subheader("Candidate Details")
             for item in visible_results:
                 with st.expander(f"{item['rank']}. {item['name']} — {item['ats_score']} pts", expanded=False):
-                    c1, c2, c3, c4 = st.columns(4)
+                    c1, c2, c3, c4, c5 = st.columns(5)
                     c1.metric("ATS Score", item.get("ats_score", 0))
-                    c2.metric("Match %", f"{item.get('match_percent', 0)}%")
-                    c3.metric("Years Exp.", item.get("years_experience", 0))
-                    c4.metric("Matched Skills", len(item.get("matched_skills", [])))
+                    c2.metric("Keyword Match", f"{item.get('match_percent', 0)}%")
+                    c3.metric("Semantic Match", f"{item.get('semantic_match_percent', 0)}%")
+                    c4.metric("Final Score", item.get("final_score", item.get("ats_score", 0)))
+                    c5.metric("Matched Skills", len(item.get("matched_skills", [])))
 
                     sub_overview, sub_skills, sub_feedback = st.tabs(["Overview", "Skills", "Feedback"])
 
@@ -513,18 +539,7 @@ with tab2:
                             ).set_index("Category")
                             st.bar_chart(breakdown_df)
                             st.metric("Total ATS", breakdown.get("total", item.get("ats_score", 0)))
-                    with sub_overview:
-                        breakdown = item.get("ats_breakdown", {})
-                    if breakdown:
-                         breakdown_df = pd.DataFrame(
-                               [
-                                    {"Category": k.replace("_", " ").title(), "Score": v}
-                                    for k, v in breakdown.items()
-                                    if k != "total"
-            ]
-                         ).set_index("Category")
-                         st.bar_chart(breakdown_df)
-                         st.metric("Total ATS", breakdown.get("total", item.get("ats_score", 0)))
+
                     with sub_skills:
                         st.write("**Matched Skills:**")
                         matched = item.get("matched_skills", [])
@@ -579,28 +594,34 @@ with tab2:
             names = [r["name"] for r in ranked_results]
             if len(names) >= 2:
                 cmp_col1, cmp_col2 = st.columns(2)
-                cand_a = cmp_col1.selectbox("Candidate A", names, index=0)
-                cand_b = cmp_col2.selectbox("Candidate B", names, index=1 if len(names) > 1 else 0)
+                cand_a = cmp_col1.selectbox("Candidate A", names, index=0, key="compare_candidate_a")
+                cand_b = cmp_col2.selectbox("Candidate B", names, index=1 if len(names) > 1 else 0, key="compare_candidate_b")
 
                 item_a = next(r for r in ranked_results if r["name"] == cand_a)
                 item_b = next(r for r in ranked_results if r["name"] == cand_b)
 
                 compare_df = pd.DataFrame(
                     {
-                        "Metric": ["ATS Score", "Match %", "Years Exp.", "Matched Skills", "Missing Required"],
+                        "Metric": [
+                            "ATS Score",
+                            "Keyword Match",
+                            "Semantic Match",
+                            "Final Score",
+                            "Years Exp.",
+                        ],
                         cand_a: [
-                            item_a["ats_score"],
-                            item_a["match_percent"],
+                            item_a.get("ats_score", 0),
+                            item_a.get("match_percent", 0),
+                            item_a.get("semantic_match_percent", 0),
+                            item_a.get("final_score", item_a.get("ats_score", 0)),
                             item_a.get("years_experience", 0),
-                            len(item_a.get("matched_skills", [])),
-                            len(item_a.get("missing_required_skills", [])),
                         ],
                         cand_b: [
-                            item_b["ats_score"],
-                            item_b["match_percent"],
+                            item_b.get("ats_score", 0),
+                            item_b.get("match_percent", 0),
+                            item_b.get("semantic_match_percent", 0),
+                            item_b.get("final_score", item_b.get("ats_score", 0)),
                             item_b.get("years_experience", 0),
-                            len(item_b.get("matched_skills", [])),
-                            len(item_b.get("missing_required_skills", [])),
                         ],
                     }
                 ).set_index("Metric")
@@ -622,15 +643,18 @@ with tab3:
         st.info("Rank candidates in the Ranking tab to unlock insights.")
     else:
         insights = compute_aggregate_insights(st.session_state.ranking_results)
-
-        i1, i2, i3 = st.columns(3)
+        i1, i2, i3, i4, i5 = st.columns(5)
         i1.metric("Candidates Ranked", insights["candidate_count"])
         i2.metric("Average ATS Score", insights["avg_ats_score"])
-        i3.metric("Average Match %", f"{insights['avg_match_percent']}%")
+        i3.metric("Average Keyword Match", f"{insights['avg_match_percent']}%")
+        i4.metric("Average Semantic Match", f"{insights.get('avg_semantic_match_percent', 0)}%")
+        i5.metric("Highest Semantic Match", f"{insights.get('highest_semantic_match_percent', 0)}%")
 
         st.markdown("**Most Common Skill Gaps Across Candidates**")
         if insights["top_missing_skills"]:
-            gap_df = pd.DataFrame(insights["top_missing_skills"], columns=["Skill", "Candidates Missing It"]).set_index("Skill")
+            gap_df = pd.DataFrame(
+                insights["top_missing_skills"], columns=["Skill", "Candidates Missing It"]
+            ).set_index("Skill")
             st.bar_chart(gap_df)
             st.caption("Consider whether these skills are truly required, or adjust sourcing to target them.")
         else:
