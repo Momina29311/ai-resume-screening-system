@@ -1,92 +1,124 @@
 [
   {
     "name": "AI_ML_Engineer_Resume_Maya_Chen.pdf",
-    "ats_score": 90,
-    "match_percent": 90,
+    "ats_score": 84,
+    "match_percent": 75,
     "years_experience": 0,
     "matched_skills": [
       "aws",
       "docker",
       "git",
+      "github",
+      "machine learning",
       "natural language processing",
       "python",
-      "sql"
+      "pytorch",
+      "sql",
+      "tensorflow"
     ],
     "missing_skills": [
+      "rest api",
+      "postgresql",
       "streamlit"
     ],
-    "missing_required_skills": [],
+    "missing_required_skills": [
+      "rest api"
+    ],
     "missing_preferred_skills": [
+      "postgresql",
       "streamlit"
     ],
     "ats_breakdown": {
-      "skills": 36,
+      "skills": 30,
       "experience": 14,
       "education": 15,
       "projects": 10,
       "certifications": 8,
       "completeness": 7,
-      "total": 90
+      "total": 84
     },
-    "recommendation_level": "Highly Recommended",
+    "recommendation_level": "Consider",
     "feedback": [
-      "Strong overall profile with excellent alignment to the job description.",
-      "Matched strengths include: aws, docker, git, natural language processing, python.",
+      "Solid candidate with good alignment, but a few gaps remain.",
+      "Matched strengths include: aws, docker, git, github, machine learning.",
+      "Missing required skills: rest api.",
       "Suitable for interview after technical review."
     ],
     "recommendations": [
+      "Add rest api experience to the resume \u2014 this is a required skill.",
+      "Consider highlighting postgresql, listed as a preferred skill.",
       "Consider highlighting streamlit, listed as a preferred skill."
     ],
+    "keyword_match_score": 80,
+    "semantic_match_score": 63.77,
+    "semantic_match_label": "Moderate Semantic Match",
     "rank": 1,
     "score_gap_from_best": 0
   },
   {
     "name": "Data_Analyst_Resume_Jordan_Reyes.pdf",
-    "ats_score": 75,
-    "match_percent": 54,
+    "ats_score": 68,
+    "match_percent": 36,
     "years_experience": 0,
     "matched_skills": [
       "git",
+      "github",
       "python",
       "sql"
     ],
     "missing_skills": [
       "docker",
-      "aws",
+      "machine learning",
       "natural language processing",
-      "streamlit"
+      "rest api",
+      "aws",
+      "postgresql",
+      "pytorch",
+      "streamlit",
+      "tensorflow"
     ],
     "missing_required_skills": [
-      "docker"
+      "docker",
+      "machine learning",
+      "natural language processing",
+      "rest api"
     ],
     "missing_preferred_skills": [
       "aws",
-      "natural language processing",
-      "streamlit"
+      "postgresql",
+      "pytorch",
+      "streamlit",
+      "tensorflow"
     ],
     "ats_breakdown": {
-      "skills": 21,
+      "skills": 14,
       "experience": 14,
       "education": 15,
       "projects": 10,
       "certifications": 8,
       "completeness": 7,
-      "total": 75
+      "total": 68
     },
     "recommendation_level": "Not Recommended",
     "feedback": [
-      "Solid candidate with good alignment, but a few gaps remain.",
-      "Matched strengths include: git, python, sql.",
-      "Missing required skills: docker.",
+      "Candidate needs stronger alignment with the target role.",
+      "Matched strengths include: git, github, python, sql.",
+      "Missing required skills: docker, machine learning, natural language processing, rest api.",
       "Needs improvement before recruiter shortlist."
     ],
     "recommendations": [
       "Add docker experience to the resume \u2014 this is a required skill.",
+      "Add machine learning experience to the resume \u2014 this is a required skill.",
+      "Add natural language processing experience to the resume \u2014 this is a required skill.",
+      "Add rest api experience to the resume \u2014 this is a required skill.",
       "Consider highlighting aws, listed as a preferred skill.",
-      "Consider highlighting natural language processing, listed as a preferred skill.",
+      "Consider highlighting postgresql, listed as a preferred skill.",
       "Include measurable project outcomes."
     ],
+    "keyword_match_score": 35,
+    "semantic_match_score": 38.17,
+    "semantic_match_label": "Weak Semantic Match",
     "rank": 2,
-    "score_gap_from_best": 15
+    "score_gap_from_best": 16
   }
 ]

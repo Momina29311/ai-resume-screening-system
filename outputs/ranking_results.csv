@@ -1,3 +1,3 @@
 rank,name,ats_score,match_percent,years_experience,recommendation_level,matched_skills,missing_required_skills,missing_preferred_skills
-1,AI_ML_Engineer_Resume_Maya_Chen.pdf,90,90,0,Highly Recommended,aws; docker; git; natural language processing; python; sql,,streamlit
-2,Data_Analyst_Resume_Jordan_Reyes.pdf,75,54,0,Not Recommended,git; python; sql,docker,aws; natural language processing; streamlit
+1,AI_ML_Engineer_Resume_Maya_Chen.pdf,84,75,0,Consider,aws; docker; git; github; machine learning; natural language processing; python; pytorch; sql; tensorflow,rest api,postgresql; streamlit
+2,Data_Analyst_Resume_Jordan_Reyes.pdf,68,36,0,Not Recommended,git; github; python; sql,docker; machine learning; natural language processing; rest api,aws; postgresql; pytorch; streamlit; tensorflow

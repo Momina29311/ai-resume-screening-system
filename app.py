@@ -421,6 +421,7 @@ with tab2:
                     "Candidate": item["name"],
                     "ATS Score": item["ats_score"],
                     "Match %": item["match_percent"],
+                    "Semantic %": item.get("semantic_match_score", 0),
                     "Years Exp.": item.get("years_experience", 0),
                     "Recommendation": item["recommendation_level"],
                 }
@@ -512,7 +513,18 @@ with tab2:
                             ).set_index("Category")
                             st.bar_chart(breakdown_df)
                             st.metric("Total ATS", breakdown.get("total", item.get("ats_score", 0)))
-
+                    with sub_overview:
+                        breakdown = item.get("ats_breakdown", {})
+                    if breakdown:
+                         breakdown_df = pd.DataFrame(
+                               [
+                                    {"Category": k.replace("_", " ").title(), "Score": v}
+                                    for k, v in breakdown.items()
+                                    if k != "total"
+            ]
+                         ).set_index("Category")
+                         st.bar_chart(breakdown_df)
+                         st.metric("Total ATS", breakdown.get("total", item.get("ats_score", 0)))
                     with sub_skills:
                         st.write("**Matched Skills:**")
                         matched = item.get("matched_skills", [])

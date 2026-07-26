@@ -12,7 +12,7 @@ Upgrades over the baseline version:
   (average score, most commonly missing skills, etc.).
 - CSV export alongside the existing JSON export.
 """
-
+from src.matcher import match_resume_to_job
 from pathlib import Path
 import csv
 import json
@@ -230,13 +230,33 @@ def rank_candidates(parsed_resumes, job_description, skills_db):
         resume_name = resume.get("name", "Unknown Candidate")
 
         resume_set = {normalize_skill(s) for s in resume_skills}
+        # Semantic + keyword matching
+        match_result = match_resume_to_job(
+    resume_skills=resume_skills,
+    job_skills=job_skills,
+    resume_text=resume_text,
+    job_description_text=job_description,
+)
+
+        semantic_score = match_result["semantic_match_percent"]
+        semantic_label = match_result["semantic_match_label"]
 
         matched_skills = sorted(s for s in (required_norm | preferred_norm) if s in resume_set)
         missing_required = sorted(s for s in required_norm if s not in resume_set)
         missing_preferred = sorted(s for s in preferred_norm if s not in resume_set)
         missing_skills = missing_required + missing_preferred
 
-        match_percent = calculate_match_percent(resume_skills, required_skills, preferred_skills)
+        keyword_score = calculate_match_percent(
+            resume_skills,
+            required_skills,
+            preferred_skills,
+)
+
+# 70% keyword + 30% semantic
+        match_percent = round(
+            keyword_score * 0.7 + 
+            semantic_score * 0.3
+)       
         years_experience = extract_years_experience(resume_text)
         ats_score, breakdown = calculate_ats_score(match_percent, resume_text, years_experience)
 
@@ -258,6 +278,9 @@ def rank_candidates(parsed_resumes, job_description, skills_db):
                 "recommendation_level": recommendation_level,
                 "feedback": feedback,
                 "recommendations": suggestions,
+                "keyword_match_score": keyword_score,
+                "semantic_match_score": semantic_score,
+                "semantic_match_label": semantic_label,
             }
         )
 
