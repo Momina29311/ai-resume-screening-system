@@ -1,20 +1,20 @@
 # 🚀 ResumeIQ – AI-Powered Resume Screening System
 
-[![Version](https://img.shields.io/badge/version-v1.1-blue.svg)](https://github.com/Momina29311/ai-resume-screening-system)
+[![Version](https://img.shields.io/badge/version-v1.2-blue.svg)](https://github.com/Momina29311/ai-resume-screening-system)
 [![Status](https://img.shields.io/badge/status-active%20development-orange.svg)](https://github.com/Momina29311/ai-resume-screening-system)
 [![Python](https://img.shields.io/badge/python-3.14+-3776AB.svg?logo=python&logoColor=white)](https://www.python.org/)
 [![Streamlit](https://img.shields.io/badge/streamlit-live-red.svg?logo=streamlit&logoColor=white)](https://streamlit.io/)
 [![Docker](https://img.shields.io/badge/docker-supported-2496ED.svg?logo=docker&logoColor=white)](https://www.docker.com/)
 [![GitHub Actions](https://img.shields.io/badge/CI-GitHub%20Actions-success.svg?logo=githubactions)](https://github.com/Momina29311/ai-resume-screening-system/actions)
-[![Tests](https://img.shields.io/badge/tests-30%20passing-brightgreen.svg)](https://github.com/Momina29311/ai-resume-screening-system)
+[![Tests](https://img.shields.io/badge/tests-46%20automated-brightgreen.svg)](https://github.com/Momina29311/ai-resume-screening-system)
 
 ---
 
 # 📄 ResumeIQ
 
-ResumeIQ is an AI-powered Resume Screening System that automates early-stage recruitment by parsing resumes, extracting technical skills, comparing candidates against job descriptions, calculating ATS scores, ranking applicants, and presenting recruiter-friendly hiring insights through an interactive dashboard.
+ResumeIQ is an AI-powered Resume Screening System that automates early-stage recruitment by parsing resumes, extracting technical skills, comparing candidates against job descriptions using both keyword and semantic matching, calculating ATS scores, ranking applicants, and presenting recruiter-friendly hiring insights through an interactive dashboard.
 
-The project combines Natural Language Processing (NLP), rule-based AI, automated testing, Docker containerization, cloud deployment, centralized configuration, logging, and CI/CD to simulate a production-ready AI application.
+The project combines Natural Language Processing (NLP), sentence-embedding-based semantic similarity, rule-based AI, automated testing, Docker containerization, cloud deployment, centralized configuration, logging, and CI/CD to simulate a production-ready AI application.
 
 Built publicly as part of my Machine Learning & AI Engineering journey.
 
@@ -63,7 +63,18 @@ https://momina-resumeiq.streamlit.app
 - Compare resumes against job descriptions
 - Identify matched skills
 - Identify missing skills
-- Calculate Match Percentage
+- Calculate keyword Match Percentage
+
+---
+
+## 🧬 Semantic Matching Engine (NEW)
+
+Goes beyond keyword overlap to understand meaning and context.
+
+- Sentence-embedding similarity between full resume text and job description (`sentence-transformers`, `all-MiniLM-L6-v2`)
+- Cosine similarity converted into a 0–100 **Semantic Match %**
+- Human-readable match labels: Strong / Moderate / Weak Semantic Match
+- Blended into scoring so conceptually strong candidates aren't penalized for wording differences alone
 
 ---
 
@@ -92,26 +103,41 @@ Transparent rule-based ATS scoring with explainable weighted categories.
 
 ---
 
-## 🏆 Candidate Ranking
+## 🧮 Final Ranking Score (NEW)
 
-- Upload multiple resumes
-- Automatic candidate ranking
-- ATS-based sorting
-- Top candidate recommendation
-- Candidate comparison
-- Ranking table
-- CSV & JSON export
+Each candidate now gets a blended **Final Score** in addition to their raw ATS Score:
+
+```
+Final Score = (ATS Score × 0.7) + (Semantic Match % × 0.3)
+```
+
+Candidate ranking, "Top Candidate" selection, and score-gap calculations are now based on Final Score rather than ATS Score alone.
 
 ---
 
-## 📊 Recruiter Hiring Insights (NEW)
+## 🏆 Candidate Ranking
 
-Recruiters can now move beyond individual resumes and analyze the entire hiring pipeline.
+- Upload multiple resumes
+- Automatic candidate ranking by Final Score
+- Sort by Final Score, ATS Score, Semantic Match, Keyword Match, or Years Experience
+- Filter by minimum ATS score and recommendation level
+- Top candidate recommendation
+- Candidate comparison (ATS Score, Keyword Match, Semantic Match, Final Score, Years Exp.)
+- Ranking table
+- CSV & JSON export (now includes semantic score and final score)
+
+---
+
+## 📊 Recruiter Hiring Insights
+
+Recruiters can move beyond individual resumes and analyze the entire hiring pipeline.
 
 ### Hiring Analytics
 
 - Average ATS Score
-- Average Match Percentage
+- Average Keyword Match %
+- Average Semantic Match % (NEW)
+- Highest Semantic Match % (NEW)
 - Candidate Statistics
 - Skill Gap Analysis
 - Recommendation Distribution
@@ -130,8 +156,9 @@ The dashboard provides an end-to-end hiring workflow.
 - Resume Upload
 - Resume Parsing
 - Skill Analysis
-- Job Description Matching
+- Job Description Matching (Keyword + Semantic)
 - ATS Score Dashboard
+- Semantic Match Comparison Chart (NEW)
 - Candidate Ranking
 - Hiring Insights
 - Candidate Comparison
@@ -188,9 +215,13 @@ GitHub Actions automatically:
                     │
                     ▼
         Resume ↔ Job Description Matching
+             (Keyword + Semantic)
                     │
                     ▼
          Explainable ATS Score Engine
+                    │
+                    ▼
+        Final Score Blending (ATS + Semantic)
                     │
                     ▼
           Candidate Ranking System
@@ -223,10 +254,12 @@ GitHub Actions automatically:
 ### NLP
 
 - NLTK
+- sentence-transformers (`all-MiniLM-L6-v2`)
 
 ### PDF Processing
 
 - pdfplumber
+- pypdf
 
 ### Dashboard
 
@@ -284,6 +317,7 @@ ai-resume-screening-system/
     ├── preprocessing.py
     ├── skill_extractor.py
     ├── matcher.py
+    ├── semantic_matcher.py
     ├── ats_score.py
     ├── ranking.py
     └── config.py
@@ -296,11 +330,11 @@ ai-resume-screening-system/
 Current automated tests cover:
 
 - Resume Parsing
-- Resume Matching
+- Resume Matching (keyword + semantic)
 - ATS Score Engine
 - Candidate Ranking
 
-✅ **30 Automated Tests Passing**
+✅ **46 Automated Tests** — run on every push via GitHub Actions CI
 
 ---
 
@@ -362,7 +396,8 @@ http://localhost:8501
 | v0.8 | Streamlit Deployment | ✅ |
 | v0.9 | Docker Support | ✅ |
 | v1.0 | GitHub Actions CI + Configuration & Logging | ✅ |
-| **v1.1** | **Recruiter Hiring Insights Dashboard** | ✅ |
+| v1.1 | Recruiter Hiring Insights Dashboard | ✅ |
+| **v1.2** | **Semantic Matching Engine + Final Score Blending** | ✅ |
 
 ---
 
@@ -370,9 +405,8 @@ http://localhost:8501
 
 - Explainable AI (XAI)
 - Machine Learning-based ATS Prediction
-- Semantic Skill Matching
 - OCR for Scanned Resumes
-- Resume Embeddings
+- Resume Embedding Caching for Faster Re-Ranking
 - Recruiter Authentication
 - REST API
 - MLOps Pipeline
