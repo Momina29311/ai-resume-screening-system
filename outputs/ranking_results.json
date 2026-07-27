@@ -1,11 +1,13 @@
 [
   {
     "name": "AI_ML_Engineer_Resume_Maya_Chen.pdf",
-    "ats_score": 84,
-    "match_percent": 75,
-    "years_experience": 0,
+    "ats_score": 88,
+    "match_percent": 71,
+    "years_experience": 9,
+    "experience_score": 90.0,
     "matched_skills": [
       "aws",
+      "deep learning",
       "docker",
       "git",
       "github",
@@ -13,112 +15,140 @@
       "natural language processing",
       "python",
       "pytorch",
+      "scikit-learn",
       "sql",
       "tensorflow"
     ],
     "missing_skills": [
+      "numpy",
+      "pandas",
       "rest api",
-      "postgresql",
+      "azure",
       "streamlit"
     ],
     "missing_required_skills": [
+      "numpy",
+      "pandas",
       "rest api"
     ],
     "missing_preferred_skills": [
-      "postgresql",
+      "azure",
       "streamlit"
     ],
     "ats_breakdown": {
-      "skills": 30,
-      "experience": 14,
+      "skills": 28,
+      "experience": 20,
       "education": 15,
       "projects": 10,
       "certifications": 8,
       "completeness": 7,
-      "total": 84
+      "total": 88
     },
     "recommendation_level": "Consider",
     "feedback": [
-      "Solid candidate with good alignment, but a few gaps remain.",
-      "Matched strengths include: aws, docker, git, github, machine learning.",
-      "Missing required skills: rest api.",
+      "Strong overall profile with excellent alignment to the job description.",
+      "Resume indicates approximately 9 year(s) of relevant experience.",
+      "Matched strengths include: aws, deep learning, docker, git, github.",
+      "Missing required skills: numpy, pandas, rest api.",
       "Suitable for interview after technical review."
     ],
     "recommendations": [
+      "Add numpy experience to the resume \u2014 this is a required skill.",
+      "Add pandas experience to the resume \u2014 this is a required skill.",
       "Add rest api experience to the resume \u2014 this is a required skill.",
-      "Consider highlighting postgresql, listed as a preferred skill.",
+      "Consider highlighting azure, listed as a preferred skill.",
       "Consider highlighting streamlit, listed as a preferred skill."
     ],
-    "keyword_match_score": 80,
-    "semantic_match_score": 63.77,
+    "keyword_match_score": 72,
+    "semantic_match_score": 70.02,
+    "semantic_match_percent": 70.02,
     "semantic_match_label": "Moderate Semantic Match",
+    "final_score": 82.8,
     "rank": 1,
-    "score_gap_from_best": 0
+    "score_gap_from_best": 0.0,
+    "ranking_reasons": [
+      "\u2714 High ATS score",
+      "\u2714 Strong semantic similarity",
+      "\u2714 Relevant experience"
+    ]
   },
   {
     "name": "Data_Analyst_Resume_Jordan_Reyes.pdf",
-    "ats_score": 68,
-    "match_percent": 36,
-    "years_experience": 0,
+    "ats_score": 76,
+    "match_percent": 41,
+    "years_experience": 7,
+    "experience_score": 70.0,
     "matched_skills": [
       "git",
       "github",
+      "numpy",
+      "pandas",
       "python",
       "sql"
     ],
     "missing_skills": [
+      "deep learning",
       "docker",
       "machine learning",
       "natural language processing",
       "rest api",
+      "scikit-learn",
       "aws",
-      "postgresql",
+      "azure",
       "pytorch",
       "streamlit",
       "tensorflow"
     ],
     "missing_required_skills": [
+      "deep learning",
       "docker",
       "machine learning",
       "natural language processing",
-      "rest api"
+      "rest api",
+      "scikit-learn"
     ],
     "missing_preferred_skills": [
       "aws",
-      "postgresql",
+      "azure",
       "pytorch",
       "streamlit",
       "tensorflow"
     ],
     "ats_breakdown": {
-      "skills": 14,
-      "experience": 14,
+      "skills": 16,
+      "experience": 20,
       "education": 15,
       "projects": 10,
       "certifications": 8,
       "completeness": 7,
-      "total": 68
+      "total": 76
     },
     "recommendation_level": "Not Recommended",
     "feedback": [
-      "Candidate needs stronger alignment with the target role.",
-      "Matched strengths include: git, github, python, sql.",
-      "Missing required skills: docker, machine learning, natural language processing, rest api.",
+      "Solid candidate with good alignment, but a few gaps remain.",
+      "Resume indicates approximately 7 year(s) of relevant experience.",
+      "Matched strengths include: git, github, numpy, pandas, python.",
+      "Missing required skills: deep learning, docker, machine learning, natural language processing, rest api.",
       "Needs improvement before recruiter shortlist."
     ],
     "recommendations": [
+      "Add deep learning experience to the resume \u2014 this is a required skill.",
       "Add docker experience to the resume \u2014 this is a required skill.",
       "Add machine learning experience to the resume \u2014 this is a required skill.",
       "Add natural language processing experience to the resume \u2014 this is a required skill.",
-      "Add rest api experience to the resume \u2014 this is a required skill.",
       "Consider highlighting aws, listed as a preferred skill.",
-      "Consider highlighting postgresql, listed as a preferred skill.",
+      "Consider highlighting azure, listed as a preferred skill.",
       "Include measurable project outcomes."
     ],
-    "keyword_match_score": 35,
-    "semantic_match_score": 38.17,
+    "keyword_match_score": 41,
+    "semantic_match_score": 41.57,
+    "semantic_match_percent": 41.57,
     "semantic_match_label": "Weak Semantic Match",
+    "final_score": 65.1,
     "rank": 2,
-    "score_gap_from_best": 16
+    "score_gap_from_best": 17.7,
+    "ranking_reasons": [
+      "\u2714 Balanced overall profile"
+    ]
   }
 ]
