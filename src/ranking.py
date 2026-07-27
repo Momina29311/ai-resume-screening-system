@@ -1,19 +1,34 @@
 """
 Candidate ranking engine for ResumeIQ.
 
-Upgrades over the baseline version:
-- Skill alias normalization (e.g. "js" -> "javascript") so near-identical
-  skills aren't treated as mismatches.
-- Required vs. preferred skill parsing from the job description, with
-  required skills weighted higher in the match score.
-- Years-of-experience extraction from resume text (regex based), blended
-  into the "experience" ATS category instead of relying on word count alone.
-- Aggregate insight helpers so the UI can show cross-candidate stats
-  (average score, most commonly missing skills, etc.).
-- CSV export alongside the existing JSON export.
+Day 84 upgrade — Hybrid AI Candidate Ranking:
+- final_score now blends ATS score, semantic similarity, AND experience
+  (60% / 30% / 10%) instead of just ATS + semantic.
+- experience_score (0-100, normalized from years_experience) is now a
+  first-class field on every candidate.
+- explain_ranking() gives human-readable reasons for why a candidate
+  ranked where they did (explainability for Day 85 lead-in).
+- Aggregate insights now include final_score stats (highest/average),
+  alongside the existing ats/match/semantic stats.
+- CSV/JSON export include experience_score and final_score.
+
+Day 84.1 patch — Experience extraction fix:
+- extract_years_experience() now ALSO parses job-history date ranges
+  (e.g. "Mar 2022 – Present", "Jul 2019 – Feb 2022") and computes career
+  span from the earliest start date to the latest end date. Previously
+  only explicit phrasing like "5 years of experience" was detected, which
+  meant resumes using a standard work-history format (dates per role, no
+  explicit year count) scored 0 experience even for senior candidates.
+  The function now takes the max of both detection methods.
+
+Carried over from the previous version:
+- Skill alias normalization (e.g. "js" -> "javascript").
+- Required vs. preferred skill parsing from the job description.
+- Aggregate insight helpers (average score, most commonly missing skills).
 """
 from src.matcher import match_resume_to_job
 from pathlib import Path
+from datetime import date
 import csv
 import json
 import re
@@ -38,14 +53,36 @@ SKILL_ALIASES = {
 
 PREFERRED_MARKERS = ["preferred", "nice to have", "nice-to-have", "bonus", "a plus", "good to have"]
 
+# Method 1: explicit phrasing, e.g. "5 years of experience"
 YEARS_PATTERNS = [
     re.compile(r"(\d{1,2})\+?\s*(?:years?|yrs?)\s*(?:of)?\s*experience", re.IGNORECASE),
     re.compile(r"experience\s*[:\-]?\s*(\d{1,2})\+?\s*(?:years?|yrs?)", re.IGNORECASE),
 ]
 
+# Method 2: job-history date ranges, e.g. "Mar 2022 – Present", "Jul 2019 - Feb 2022"
+MONTH_MAP = {
+    "jan": 1, "feb": 2, "mar": 3, "apr": 4, "may": 5, "jun": 6,
+    "jul": 7, "aug": 8, "sep": 9, "sept": 9, "oct": 10, "nov": 11, "dec": 12,
+    "january": 1, "february": 2, "march": 3, "april": 4, "june": 6,
+    "july": 7, "august": 8, "september": 9, "october": 10,
+    "november": 11, "december": 12,
+}
+
+DATE_RANGE_PATTERN = re.compile(
+    r"(?P<start_month>[A-Za-z]{3,9})\.?\s+(?P<start_year>\d{4})\s*[-–—]+\s*"
+    r"(?P<end_month>[A-Za-z]{3,9}|Present|Current)\.?\s*(?P<end_year>\d{4})?",
+    re.IGNORECASE,
+)
+
 DEGREE_WORDS = ["bachelor", "master", "bsc", "msc", "bs", "ms", "phd", "degree", "b.tech", "m.tech"]
 PROJECT_WORDS = ["project", "built", "developed", "implemented", "dashboard", "api", "shipped", "launched"]
 CERT_WORDS = ["certification", "certificate", "certified", "coursera", "udemy", "aws certified", "pmp"]
+
+# Hybrid final-score weights: ATS, Semantic, Experience (must sum to 1.0)
+FINAL_SCORE_WEIGHTS = (0.60, 0.30, 0.10)
+
+# Years of experience treated as "fully maxed" for normalization purposes
+MAX_YEARS_FOR_SCORING = 10
 
 
 def normalize_skill(skill):
@@ -53,8 +90,8 @@ def normalize_skill(skill):
     return SKILL_ALIASES.get(s, s)
 
 
-def extract_years_experience(resume_text):
-    """Best-effort extraction of the largest 'X years experience' figure mentioned."""
+def _extract_explicit_years(resume_text):
+    """Method 1: largest 'X years experience' figure explicitly stated."""
     years_found = []
     for pattern in YEARS_PATTERNS:
         for match in pattern.finditer(resume_text):
@@ -63,6 +100,73 @@ def extract_years_experience(resume_text):
             except (ValueError, IndexError):
                 continue
     return max(years_found) if years_found else 0
+
+
+def _extract_date_range_years(resume_text):
+    """
+    Method 2: parses "Month YYYY – Month YYYY" / "Month YYYY – Present" style
+    ranges commonly used in work-history sections, and returns the total span
+    from the earliest start date to the latest end date (in years).
+    """
+    earliest_start = None
+    latest_end = None
+    today = date.today()
+
+    for match in DATE_RANGE_PATTERN.finditer(resume_text):
+        start_month_str = match.group("start_month").lower()[:3]
+        start_year = match.group("start_year")
+        end_month_raw = match.group("end_month")
+        end_month_str = end_month_raw.lower()[:3] if end_month_raw else None
+        end_year = match.group("end_year")
+
+        if start_month_str not in MONTH_MAP or not start_year:
+            continue
+
+        try:
+            start_dt = date(int(start_year), MONTH_MAP[start_month_str], 1)
+        except ValueError:
+            continue
+
+        if end_month_str in ("pre", "cur"):  # "Present" / "Current"
+            end_dt = today
+        elif end_month_str in MONTH_MAP and end_year:
+            try:
+                end_dt = date(int(end_year), MONTH_MAP[end_month_str], 1)
+            except ValueError:
+                end_dt = start_dt
+        else:
+            end_dt = start_dt  # fallback: single date mention, no real range
+
+        if earliest_start is None or start_dt < earliest_start:
+            earliest_start = start_dt
+        if latest_end is None or end_dt > latest_end:
+            latest_end = end_dt
+
+    if earliest_start and latest_end and latest_end > earliest_start:
+        return round((latest_end - earliest_start).days / 365.25)
+    return 0
+
+
+def extract_years_experience(resume_text):
+    """
+    Best-effort extraction of total years of experience. Combines two
+    detection methods and returns the larger of the two:
+      1. Explicit phrasing ("5 years of experience").
+      2. Career span computed from job-history date ranges
+         ("Mar 2022 – Present", "Jul 2019 – Feb 2022", ...).
+    This ensures resumes that only list role dates (no explicit year count)
+    still get accurate experience credit.
+    """
+    explicit_years = _extract_explicit_years(resume_text)
+    date_range_years = _extract_date_range_years(resume_text)
+    return max(explicit_years, date_range_years)
+
+
+def normalize_experience_score(years_experience, max_years=MAX_YEARS_FOR_SCORING):
+    """Scale years of experience to a 0-100 score for use in the hybrid formula."""
+    if not years_experience:
+        return 0.0
+    return round(min(years_experience / max_years, 1.0) * 100, 1)
 
 
 def parse_job_requirements(job_description, skills_db):
@@ -161,6 +265,17 @@ def calculate_ats_score(match_percent, resume_text, years_experience=0):
     return breakdown["total"], breakdown
 
 
+def calculate_final_score(ats_score, semantic_match_percent, experience_score,
+                           weights=FINAL_SCORE_WEIGHTS):
+    """
+    Hybrid AI ranking score combining ATS, semantic similarity, and experience.
+    weights = (ats_weight, semantic_weight, experience_weight), sums to 1.0.
+    """
+    w_ats, w_sem, w_exp = weights
+    final = (ats_score * w_ats) + (semantic_match_percent * w_sem) + (experience_score * w_exp)
+    return round(final, 1)
+
+
 def get_recommendation_level(ats_score, match_percent):
     if ats_score >= 85 and match_percent >= 75:
         return "Highly Recommended"
@@ -215,6 +330,36 @@ def build_suggestions(missing_required, missing_preferred, resume_text):
     return suggestions
 
 
+def explain_ranking(candidate, all_candidates):
+    """
+    Generate human-readable, explainable bullet points for why a candidate
+    ranked where they did relative to the rest of the pool.
+    """
+    if not all_candidates:
+        return ["✔ Balanced overall profile"]
+
+    reasons = []
+    avg_ats = sum(c["ats_score"] for c in all_candidates) / len(all_candidates)
+    avg_sem = sum(c["semantic_match_percent"] for c in all_candidates) / len(all_candidates)
+    avg_exp = sum(c.get("experience_score", 0) for c in all_candidates) / len(all_candidates)
+
+    if candidate["ats_score"] >= avg_ats:
+        reasons.append("✔ High ATS score")
+    if candidate["semantic_match_percent"] >= avg_sem:
+        reasons.append("✔ Strong semantic similarity")
+    if candidate.get("experience_score", 0) >= avg_exp:
+        reasons.append("✔ Relevant experience")
+
+    missing_required = candidate.get("missing_required_skills", candidate.get("missing_skills", []))
+    if len(missing_required) <= 2:
+        reasons.append("✔ Few missing skills")
+
+    if not reasons:
+        reasons.append("✔ Balanced overall profile")
+
+    return reasons
+
+
 def rank_candidates(parsed_resumes, job_description, skills_db):
     required_skills, preferred_skills = parse_job_requirements(job_description, skills_db)
     job_skills = required_skills + preferred_skills
@@ -260,12 +405,14 @@ def rank_candidates(parsed_resumes, job_description, skills_db):
 
         years_experience = extract_years_experience(resume_text)
         ats_score, breakdown = calculate_ats_score(match_percent, resume_text, years_experience)
+        experience_score = normalize_experience_score(years_experience)
 
-        # Final ranking score blends the overall ATS score with the raw semantic
-        # similarity, so a candidate that reads as a strong conceptual fit for
-        # the role (even with slightly different wording/skills) can outrank
-        # a keyword-only match. Weighting: 70% ATS, 30% semantic.
-        final_score = round(ats_score * 0.7 + semantic_score * 0.3, 1)
+        # Final ranking score = Hybrid AI Score.
+        # Blends ATS (rule-based), semantic similarity (conceptual fit),
+        # and normalized years of experience, so a candidate who reads as
+        # a strong conceptual fit for the role — even with different
+        # wording/skills or more tenure — can outrank a keyword-only match.
+        final_score = calculate_final_score(ats_score, semantic_score, experience_score)
 
         recommendation_level = get_recommendation_level(ats_score, match_percent)
         feedback = build_feedback(ats_score, match_percent, matched_skills, missing_required, years_experience)
@@ -277,6 +424,7 @@ def rank_candidates(parsed_resumes, job_description, skills_db):
                 "ats_score": ats_score,
                 "match_percent": match_percent,
                 "years_experience": years_experience,
+                "experience_score": experience_score,
                 "matched_skills": matched_skills,
                 "missing_skills": missing_skills,
                 "missing_required_skills": missing_required,
@@ -299,6 +447,7 @@ def rank_candidates(parsed_resumes, job_description, skills_db):
     for i, item in enumerate(ranked, start=1):
         item["rank"] = i
         item["score_gap_from_best"] = round(best_score - item["final_score"], 1)
+        item["ranking_reasons"] = explain_ranking(item, ranked)
 
     return ranked
 
@@ -311,6 +460,8 @@ def compute_aggregate_insights(ranked_results):
             "avg_match_percent": 0,
             "avg_semantic_match_percent": 0,
             "highest_semantic_match_percent": 0,
+            "avg_final_score": 0,
+            "highest_final_score": 0,
             "top_missing_skills": [],
             "candidate_count": 0,
         }
@@ -319,6 +470,9 @@ def compute_aggregate_insights(ranked_results):
     avg_match = sum(r["match_percent"] for r in ranked_results) / len(ranked_results)
     avg_semantic = sum(r.get("semantic_match_percent", 0) for r in ranked_results) / len(ranked_results)
     highest_semantic = max((r.get("semantic_match_percent", 0) for r in ranked_results), default=0)
+
+    avg_final = sum(r.get("final_score", 0) for r in ranked_results) / len(ranked_results)
+    highest_final = max((r.get("final_score", 0) for r in ranked_results), default=0)
 
     missing_counter = {}
     for r in ranked_results:
@@ -332,6 +486,8 @@ def compute_aggregate_insights(ranked_results):
         "avg_match_percent": round(avg_match, 1),
         "avg_semantic_match_percent": round(avg_semantic, 1),
         "highest_semantic_match_percent": round(highest_semantic, 1),
+        "avg_final_score": round(avg_final, 1),
+        "highest_final_score": round(highest_final, 1),
         "top_missing_skills": top_missing,  # list of (skill, count)
         "candidate_count": len(ranked_results),
     }
@@ -352,6 +508,7 @@ def export_ranking_csv(ranked_results, output_path="outputs/ranking_results.csv"
         "ats_score",
         "match_percent",
         "semantic_match_percent",
+        "experience_score",
         "final_score",
         "years_experience",
         "recommendation_level",
@@ -370,6 +527,7 @@ def export_ranking_csv(ranked_results, output_path="outputs/ranking_results.csv"
                     "ats_score": item.get("ats_score"),
                     "match_percent": item.get("match_percent"),
                     "semantic_match_percent": item.get("semantic_match_percent"),
+                    "experience_score": item.get("experience_score"),
                     "final_score": item.get("final_score"),
                     "years_experience": item.get("years_experience"),
                     "recommendation_level": item.get("recommendation_level"),
