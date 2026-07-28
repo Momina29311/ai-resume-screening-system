@@ -1,6 +1,23 @@
 """
 Candidate ranking engine for ResumeIQ.
 
+Day 85 upgrade — Explainable AI (XAI):
+- generate_score_breakdown() shows exactly how the final score was built
+  from its three weighted components (ATS / semantic / experience).
+- generate_strengths_weaknesses() produces a clean strengths vs. weaknesses
+  split per candidate, separate from the free-text feedback/suggestions.
+- generate_recommendation_reason() gives a structured {label, reasons} pair
+  driving the recommendation callout in the UI.
+- compare_candidates_explanation() replaces raw side-by-side numbers with
+  "X ranks higher because ..." reasoning for both candidates.
+- compute_recruiter_top_strengths() rolls strengths up across the whole
+  pool for the recruiter insights dashboard.
+- export_explainability_report_json()/_csv() produce a downloadable,
+  fully-explained report (per-candidate strengths/weaknesses/reason),
+  separate from the raw ranking_results export.
+- Every candidate dict returned by rank_candidates() now also carries
+  score_breakdown, strengths, weaknesses, and recommendation_reason.
+
 Day 84 upgrade — Hybrid AI Candidate Ranking:
 - final_score now blends ATS score, semantic similarity, AND experience
   (60% / 30% / 10%) instead of just ATS + semantic.
@@ -276,6 +293,42 @@ def calculate_final_score(ats_score, semantic_match_percent, experience_score,
     return round(final, 1)
 
 
+def generate_score_breakdown(ats_score, semantic_match_percent, experience_score,
+                              weights=FINAL_SCORE_WEIGHTS):
+    """
+    Day 85 — Explainable AI: shows exactly how the final score was built,
+    e.g.
+
+        ATS Score Contribution   : 70 x 0.60 = 42.0
+        Semantic Similarity      : 92 x 0.30 = 27.6
+        Experience Bonus         : 100 x 0.10 = 10.0
+        Final Score              : 79.6
+
+    Returns a dict with each weighted contribution plus the recombined
+    final score, so the UI can render it as a transparent line-by-line
+    calculation instead of a single opaque number.
+    """
+    w_ats, w_sem, w_exp = weights
+
+    ats_contribution = round(ats_score * w_ats, 1)
+    semantic_contribution = round(semantic_match_percent * w_sem, 1)
+    experience_contribution = round(experience_score * w_exp, 1)
+    final = round(ats_contribution + semantic_contribution + experience_contribution, 1)
+
+    return {
+        "ats_score": ats_score,
+        "ats_weight": w_ats,
+        "ats_contribution": ats_contribution,
+        "semantic_score": semantic_match_percent,
+        "semantic_weight": w_sem,
+        "semantic_contribution": semantic_contribution,
+        "experience_score": experience_score,
+        "experience_weight": w_exp,
+        "experience_contribution": experience_contribution,
+        "final_score": final,
+    }
+
+
 def get_recommendation_level(ats_score, match_percent):
     if ats_score >= 85 and match_percent >= 75:
         return "Highly Recommended"
@@ -330,6 +383,72 @@ def build_suggestions(missing_required, missing_preferred, resume_text):
     return suggestions
 
 
+def generate_strengths_weaknesses(ats_score, semantic_match_percent, years_experience,
+                                   matched_skills, missing_required_skills, missing_preferred_skills):
+    """
+    Day 85 — Explainable AI: a clean, structured strengths vs. weaknesses
+    split, separate from the free-text feedback. Used to power the
+    "Strengths" / "Weaknesses" sections of each candidate card.
+    """
+    strengths = []
+    weaknesses = []
+
+    if ats_score >= 85:
+        strengths.append(f"Excellent ATS score ({ats_score})")
+    elif ats_score >= 70:
+        strengths.append(f"Solid ATS score ({ats_score})")
+    else:
+        weaknesses.append(f"Below-target ATS score ({ats_score})")
+
+    if semantic_match_percent >= 80:
+        strengths.append(f"High semantic relevance ({semantic_match_percent}%)")
+    elif semantic_match_percent < 50:
+        weaknesses.append(f"Low semantic similarity to job description ({semantic_match_percent}%)")
+
+    if years_experience >= 5:
+        strengths.append(f"Strong experience depth ({years_experience} years)")
+    elif years_experience >= 2:
+        strengths.append(f"Relevant work experience ({years_experience} years)")
+    else:
+        weaknesses.append("Limited or undetected work experience")
+
+    if matched_skills:
+        strengths.append(f"{len(matched_skills)} matched skill(s), including {', '.join(matched_skills[:3])}")
+
+    if not missing_required_skills:
+        strengths.append("All required skills matched")
+    else:
+        for skill in missing_required_skills[:5]:
+            weaknesses.append(f"Missing {skill}")
+
+    for skill in missing_preferred_skills[:3]:
+        weaknesses.append(f"Missing preferred skill: {skill}")
+
+    if not strengths:
+        strengths.append("No standout strengths identified yet")
+    if not weaknesses:
+        weaknesses.append("No significant gaps detected")
+
+    return strengths, weaknesses
+
+
+def generate_recommendation_reason(recommendation_level, strengths, weaknesses):
+    """
+    Day 85 — Explainable AI: turns a bare recommendation label
+    ("Highly Recommended") into a structured {label, reasons} pair the UI
+    can render as a bulleted justification instead of just a badge.
+    """
+    if recommendation_level == "Highly Recommended":
+        reasons = strengths[:4] if strengths else ["Consistently strong scores across the board"]
+    elif recommendation_level == "Consider":
+        reasons = (strengths[:2] + [f"Gap to close: {w}" for w in weaknesses[:2]]) or \
+                   ["Reasonable overall fit, worth a closer look"]
+    else:
+        reasons = weaknesses[:4] if weaknesses else ["Overall alignment falls short of the role requirements"]
+
+    return {"label": recommendation_level, "reasons": reasons}
+
+
 def explain_ranking(candidate, all_candidates):
     """
     Generate human-readable, explainable bullet points for why a candidate
@@ -358,6 +477,61 @@ def explain_ranking(candidate, all_candidates):
         reasons.append("✔ Balanced overall profile")
 
     return reasons
+
+
+def compare_candidates_explanation(candidate_a, candidate_b):
+    """
+    Day 85 — Explainable AI: structured head-to-head comparison.
+    Instead of a bare numbers table, returns "+ reasons" for each
+    candidate plus an overall winner, e.g.
+
+        Ali ranks higher because:
+          + Better semantic similarity
+          + More experience
+          + More required skills matched
+
+        Sara:
+          + Higher ATS score
+    """
+    reasons_a, reasons_b = [], []
+
+    def _compare(label, val_a, val_b, higher_is_better=True):
+        if val_a == val_b:
+            return
+        a_wins = (val_a > val_b) if higher_is_better else (val_a < val_b)
+        if a_wins:
+            reasons_a.append(label)
+        else:
+            reasons_b.append(label)
+
+    _compare("Higher ATS score", candidate_a.get("ats_score", 0), candidate_b.get("ats_score", 0))
+    _compare("Better semantic similarity", candidate_a.get("semantic_match_percent", 0), candidate_b.get("semantic_match_percent", 0))
+    _compare("More experience", candidate_a.get("years_experience", 0), candidate_b.get("years_experience", 0))
+    _compare(
+        "More required skills matched",
+        len(candidate_a.get("matched_skills", [])),
+        len(candidate_b.get("matched_skills", [])),
+    )
+    _compare(
+        "Fewer missing required skills",
+        len(candidate_a.get("missing_required_skills", [])),
+        len(candidate_b.get("missing_required_skills", [])),
+        higher_is_better=False,
+    )
+
+    score_a = candidate_a.get("final_score", candidate_a.get("ats_score", 0))
+    score_b = candidate_b.get("final_score", candidate_b.get("ats_score", 0))
+
+    if score_a == score_b:
+        winner = "Tie"
+    else:
+        winner = candidate_a["name"] if score_a > score_b else candidate_b["name"]
+
+    return {
+        "winner": winner,
+        candidate_a["name"]: reasons_a or ["No standout advantages"],
+        candidate_b["name"]: reasons_b or ["No standout advantages"],
+    }
 
 
 def rank_candidates(parsed_resumes, job_description, skills_db):
@@ -413,10 +587,17 @@ def rank_candidates(parsed_resumes, job_description, skills_db):
         # a strong conceptual fit for the role — even with different
         # wording/skills or more tenure — can outrank a keyword-only match.
         final_score = calculate_final_score(ats_score, semantic_score, experience_score)
+        score_breakdown = generate_score_breakdown(ats_score, semantic_score, experience_score)
 
         recommendation_level = get_recommendation_level(ats_score, match_percent)
         feedback = build_feedback(ats_score, match_percent, matched_skills, missing_required, years_experience)
         suggestions = build_suggestions(missing_required, missing_preferred, resume_text)
+
+        strengths, weaknesses = generate_strengths_weaknesses(
+            ats_score, semantic_score, years_experience,
+            matched_skills, missing_required, missing_preferred,
+        )
+        recommendation_reason = generate_recommendation_reason(recommendation_level, strengths, weaknesses)
 
         ranked.append(
             {
@@ -438,6 +619,10 @@ def rank_candidates(parsed_resumes, job_description, skills_db):
                 "semantic_match_percent": semantic_score,
                 "semantic_match_label": semantic_label,
                 "final_score": final_score,
+                "score_breakdown": score_breakdown,
+                "strengths": strengths,
+                "weaknesses": weaknesses,
+                "recommendation_reason": recommendation_reason,
             }
         )
 
@@ -493,6 +678,20 @@ def compute_aggregate_insights(ranked_results):
     }
 
 
+def compute_recruiter_top_strengths(ranked_results, top_n=8):
+    """
+    Day 85 — Explainable AI: rolls up the most common strengths across the
+    whole candidate pool, for the "Top strengths across candidates" panel
+    on the Insights tab.
+    """
+    strength_counter = {}
+    for r in ranked_results:
+        for strength in r.get("strengths", []):
+            strength_counter[strength] = strength_counter.get(strength, 0) + 1
+
+    return sorted(strength_counter.items(), key=lambda kv: kv[1], reverse=True)[:top_n]
+
+
 def save_ranking_results(ranked_results, output_path="outputs/ranking_results.json"):
     Path(output_path).parent.mkdir(parents=True, exist_ok=True)
     with open(output_path, "w", encoding="utf-8") as f:
@@ -534,6 +733,58 @@ def export_ranking_csv(ranked_results, output_path="outputs/ranking_results.csv"
                     "matched_skills": "; ".join(item.get("matched_skills", [])),
                     "missing_required_skills": "; ".join(item.get("missing_required_skills", [])),
                     "missing_preferred_skills": "; ".join(item.get("missing_preferred_skills", [])),
+                }
+            )
+    return output_path
+
+
+def export_explainability_report_json(ranked_results, output_path="outputs/explainability_report.json"):
+    """
+    Day 85 — full explainability report: for every candidate, the score
+    breakdown, strengths, weaknesses, and recommendation reason — the
+    "why", not just the "what".
+    """
+    Path(output_path).parent.mkdir(parents=True, exist_ok=True)
+    report = [
+        {
+            "rank": item.get("rank"),
+            "candidate": item.get("name"),
+            "ats_score": item.get("ats_score"),
+            "semantic_match_percent": item.get("semantic_match_percent"),
+            "experience_score": item.get("experience_score"),
+            "final_score": item.get("final_score"),
+            "score_breakdown": item.get("score_breakdown"),
+            "strengths": item.get("strengths"),
+            "weaknesses": item.get("weaknesses"),
+            "recommendation": item.get("recommendation_reason"),
+        }
+        for item in ranked_results
+    ]
+    with open(output_path, "w", encoding="utf-8") as f:
+        json.dump(report, f, indent=2)
+    return output_path
+
+
+def export_explainability_report_csv(ranked_results, output_path="outputs/explainability_report.csv"):
+    """
+    Day 85 — CSV variant of the explainability report: one row per
+    candidate with final score, top reason, and recommendation label.
+    """
+    Path(output_path).parent.mkdir(parents=True, exist_ok=True)
+    fieldnames = ["rank", "candidate", "final_score", "reason", "recommendation"]
+    with open(output_path, "w", encoding="utf-8", newline="") as f:
+        writer = csv.DictWriter(f, fieldnames=fieldnames)
+        writer.writeheader()
+        for item in ranked_results:
+            rec = item.get("recommendation_reason", {})
+            reasons = rec.get("reasons", [])
+            writer.writerow(
+                {
+                    "rank": item.get("rank"),
+                    "candidate": item.get("name"),
+                    "final_score": item.get("final_score"),
+                    "reason": reasons[0] if reasons else "",
+                    "recommendation": rec.get("label", item.get("recommendation_level")),
                 }
             )
     return output_path

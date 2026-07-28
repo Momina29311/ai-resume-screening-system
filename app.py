@@ -13,8 +13,12 @@ from src.ranking import (
     rank_candidates,
     save_ranking_results,
     compute_aggregate_insights,
+    compute_recruiter_top_strengths,
     export_ranking_csv,
+    export_explainability_report_json,
+    export_explainability_report_csv,
     explain_ranking,
+    compare_candidates_explanation,
 )
 
 st.set_page_config(page_title="ResumeIQ", page_icon="🚀", layout="wide")
@@ -215,6 +219,46 @@ st.markdown(
         color: #b7ffca;
         font-size: 0.88rem;
     }
+
+    .strength-pill {
+        display: inline-block;
+        padding: 0.32rem 0.75rem;
+        margin: 0.18rem 0.25rem 0.18rem 0;
+        border-radius: 999px;
+        background: rgba(46,204,113,0.14);
+        border: 1px solid rgba(46,204,113,0.30);
+        color: #b7ffca;
+        font-size: 0.86rem;
+    }
+
+    .weakness-pill {
+        display: inline-block;
+        padding: 0.32rem 0.75rem;
+        margin: 0.18rem 0.25rem 0.18rem 0;
+        border-radius: 999px;
+        background: rgba(231,76,60,0.14);
+        border: 1px solid rgba(231,76,60,0.30);
+        color: #ffb0aa;
+        font-size: 0.86rem;
+    }
+
+    .breakdown-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.45rem 0.7rem;
+        border-radius: 10px;
+        background: rgba(255,255,255,0.03);
+        border: 1px solid rgba(255,255,255,0.06);
+        margin-bottom: 0.35rem;
+        font-size: 0.92rem;
+        color: #e8ecff;
+    }
+
+    .breakdown-row.total {
+        background: rgba(77,150,255,0.12);
+        border-color: rgba(77,150,255,0.28);
+        font-weight: 700;
+    }
     </style>
     """,
     unsafe_allow_html=True,
@@ -383,6 +427,8 @@ with tab2:
     compare_btn = st.button("Rank Candidates")
     json_path = None
     csv_path = None
+    xai_json_path = None
+    xai_csv_path = None
 
     if compare_btn:
         if not st.session_state.parsed_resumes:
@@ -400,6 +446,8 @@ with tab2:
             st.session_state.ranking_results = ranked_results
             json_path = save_ranking_results(ranked_results)
             csv_path = export_ranking_csv(ranked_results)
+            xai_json_path = export_explainability_report_json(ranked_results)
+            xai_csv_path = export_explainability_report_csv(ranked_results)
             st.session_state.loading = False
 
     ranked_results = st.session_state.ranking_results
@@ -481,10 +529,10 @@ with tab2:
                 else:
                     st.dataframe(semantic_chart_df, use_container_width=True)
 
-        dl_col1, dl_col2 = st.columns(2)
+        dl_col1, dl_col2, dl_col3, dl_col4 = st.columns(4)
         with dl_col1:
             st.download_button(
-                "⬇️ Download JSON",
+                "⬇️ Ranking JSON",
                 data=json.dumps(ranked_results, indent=2),
                 file_name="ranking_results.json",
                 mime="application/json",
@@ -509,9 +557,50 @@ with tab2:
                 ]
             )
             st.download_button(
-                "⬇️ Download CSV",
+                "⬇️ Ranking CSV",
                 data=csv_df.to_csv(index=False),
                 file_name="ranking_results.csv",
+                mime="text/csv",
+            )
+        with dl_col3:
+            xai_report = [
+                {
+                    "rank": item.get("rank"),
+                    "candidate": item.get("name"),
+                    "ats_score": item.get("ats_score"),
+                    "semantic_match_percent": item.get("semantic_match_percent"),
+                    "experience_score": item.get("experience_score"),
+                    "final_score": item.get("final_score"),
+                    "score_breakdown": item.get("score_breakdown"),
+                    "strengths": item.get("strengths"),
+                    "weaknesses": item.get("weaknesses"),
+                    "recommendation": item.get("recommendation_reason"),
+                }
+                for item in ranked_results
+            ]
+            st.download_button(
+                "🧠 Explainability JSON",
+                data=json.dumps(xai_report, indent=2),
+                file_name="explainability_report.json",
+                mime="application/json",
+            )
+        with dl_col4:
+            xai_csv_df = pd.DataFrame(
+                [
+                    {
+                        "Rank": item.get("rank"),
+                        "Candidate": item.get("name"),
+                        "Final Score": item.get("final_score"),
+                        "Reason": (item.get("recommendation_reason", {}).get("reasons") or [""])[0],
+                        "Recommendation": item.get("recommendation_reason", {}).get("label", item.get("recommendation_level")),
+                    }
+                    for item in ranked_results
+                ]
+            )
+            st.download_button(
+                "🧠 Explainability CSV",
+                data=xai_csv_df.to_csv(index=False),
+                file_name="explainability_report.csv",
                 mime="text/csv",
             )
 
@@ -527,15 +616,17 @@ with tab2:
             top_col4.metric("Final AI Score", best.get("final_score", best["ats_score"]))
             top_col5.metric("Years Exp.", best.get("years_experience", 0))
 
-            rec_level = best.get("recommendation_level", "Recommended")
-            feedback = " ".join(best.get("feedback", [])) if isinstance(best.get("feedback"), list) else best.get("feedback", "")
+            rec_reason = best.get("recommendation_reason", {})
+            rec_level = rec_reason.get("label", best.get("recommendation_level", "Recommended"))
+            rec_reasons = rec_reason.get("reasons", [])
+            reason_line = " • ".join(rec_reasons) if rec_reasons else ""
 
             if rec_level == "Highly Recommended":
-                st.markdown(f'<div class="recommend-good"><b>🟢 {rec_level}</b><br>{feedback}</div>', unsafe_allow_html=True)
+                st.markdown(f'<div class="recommend-good"><b>🟢 {rec_level}</b><br>{reason_line}</div>', unsafe_allow_html=True)
             elif rec_level == "Consider":
-                st.markdown(f'<div class="recommend-mid"><b>🟡 {rec_level}</b><br>{feedback}</div>', unsafe_allow_html=True)
+                st.markdown(f'<div class="recommend-mid"><b>🟡 {rec_level}</b><br>{reason_line}</div>', unsafe_allow_html=True)
             else:
-                st.markdown(f'<div class="recommend-bad"><b>🔴 {rec_level}</b><br>{feedback}</div>', unsafe_allow_html=True)
+                st.markdown(f'<div class="recommend-bad"><b>🔴 {rec_level}</b><br>{reason_line}</div>', unsafe_allow_html=True)
 
             st.markdown("**⭐ Why this candidate ranked first**")
             reasons = best.get("ranking_reasons") or explain_ranking(best, visible_results)
@@ -552,8 +643,8 @@ with tab2:
                     c4.metric("Final AI Score", item.get("final_score", item.get("ats_score", 0)))
                     c5.metric("Matched Skills", len(item.get("matched_skills", [])))
 
-                    sub_overview, sub_skills, sub_feedback, sub_why = st.tabs(
-                        ["Overview", "Skills", "Feedback", "Why This Rank"]
+                    sub_overview, sub_explain, sub_skills, sub_feedback, sub_why = st.tabs(
+                        ["Overview", "Explainability", "Skills", "Feedback", "Why This Rank"]
                     )
 
                     with sub_overview:
@@ -568,6 +659,66 @@ with tab2:
                             ).set_index("Category")
                             st.bar_chart(breakdown_df)
                             st.metric("Total ATS", breakdown.get("total", item.get("ats_score", 0)))
+
+                    with sub_explain:
+                        st.markdown("**Score Contribution Breakdown**")
+                        sb = item.get("score_breakdown", {})
+                        if sb:
+                            st.markdown(
+                                f'<div class="breakdown-row">'
+                                f'<span>ATS Score Contribution</span>'
+                                f'<span>{sb.get("ats_score", 0)} × {sb.get("ats_weight", 0)} = {sb.get("ats_contribution", 0)}</span>'
+                                f'</div>',
+                                unsafe_allow_html=True,
+                            )
+                            st.markdown(
+                                f'<div class="breakdown-row">'
+                                f'<span>Semantic Similarity</span>'
+                                f'<span>{sb.get("semantic_score", 0)} × {sb.get("semantic_weight", 0)} = {sb.get("semantic_contribution", 0)}</span>'
+                                f'</div>',
+                                unsafe_allow_html=True,
+                            )
+                            st.markdown(
+                                f'<div class="breakdown-row">'
+                                f'<span>Experience Bonus</span>'
+                                f'<span>{sb.get("experience_score", 0)} × {sb.get("experience_weight", 0)} = {sb.get("experience_contribution", 0)}</span>'
+                                f'</div>',
+                                unsafe_allow_html=True,
+                            )
+                            st.markdown(
+                                f'<div class="breakdown-row total">'
+                                f'<span>Final Score</span>'
+                                f'<span>{sb.get("final_score", item.get("final_score", 0))}</span>'
+                                f'</div>',
+                                unsafe_allow_html=True,
+                            )
+
+                        st.markdown("**Strengths**")
+                        strengths = item.get("strengths", [])
+                        if strengths:
+                            st.markdown(
+                                "".join(f'<span class="strength-pill">✓ {s}</span>' for s in strengths),
+                                unsafe_allow_html=True,
+                            )
+                        else:
+                            st.write("None identified.")
+
+                        st.markdown("**Weaknesses**")
+                        weaknesses = item.get("weaknesses", [])
+                        if weaknesses:
+                            st.markdown(
+                                "".join(f'<span class="weakness-pill">• {w}</span>' for w in weaknesses),
+                                unsafe_allow_html=True,
+                            )
+                        else:
+                            st.write("None identified.")
+
+                        st.markdown("**Recommendation Reason**")
+                        rr = item.get("recommendation_reason", {})
+                        if rr:
+                            st.markdown(f"**{rr.get('label', item.get('recommendation_level'))}**")
+                            for r in rr.get("reasons", []):
+                                st.write(f"✓ {r}")
 
                     with sub_skills:
                         st.write("**Matched Skills:**")
@@ -666,6 +817,21 @@ with tab2:
                     }
                 ).set_index("Metric")
                 st.dataframe(compare_df, use_container_width=True)
+
+                st.markdown("**Why one ranks higher**")
+                cmp_explanation = compare_candidates_explanation(item_a, item_b)
+                winner = cmp_explanation.get("winner")
+                if winner and winner != "Tie":
+                    st.markdown(f"**{winner} ranks higher because:**")
+                exp_col1, exp_col2 = st.columns(2)
+                with exp_col1:
+                    st.markdown(f"**{cand_a}**")
+                    for r in cmp_explanation.get(cand_a, []):
+                        st.markdown(f"+ {r}")
+                with exp_col2:
+                    st.markdown(f"**{cand_b}**")
+                    for r in cmp_explanation.get(cand_b, []):
+                        st.markdown(f"+ {r}")
             else:
                 st.info("Need at least two candidates to compare.")
 
@@ -673,6 +839,10 @@ with tab2:
             st.info(f"Saved ranking results to: {json_path}")
         if csv_path:
             st.info(f"Saved CSV results to: {csv_path}")
+        if xai_json_path:
+            st.info(f"Saved explainability report to: {xai_json_path}")
+        if xai_csv_path:
+            st.info(f"Saved explainability CSV to: {xai_csv_path}")
     else:
         st.info("Run ranking to see the candidate leaderboard here.")
 
@@ -693,6 +863,22 @@ with tab3:
         j1.metric("Average ATS Score", insights["avg_ats_score"])
         j2.metric("Average Keyword Match", f"{insights['avg_match_percent']}%")
         j3.metric("Highest Semantic Match", f"{insights.get('highest_semantic_match_percent', 0)}%")
+
+        best_overall = max(
+            st.session_state.ranking_results,
+            key=lambda r: r.get("final_score", r.get("ats_score", 0)),
+        )
+        st.markdown(f"**🏅 Best Overall Candidate:** {best_overall['name']} ({best_overall.get('final_score', 0)} pts)")
+
+        st.markdown("**Top Strengths Across Candidates**")
+        top_strengths = compute_recruiter_top_strengths(st.session_state.ranking_results)
+        if top_strengths:
+            strength_pill_html = "".join(
+                f'<span class="insight-pill">✓ {s} ({c})</span>' for s, c in top_strengths
+            )
+            st.markdown(strength_pill_html, unsafe_allow_html=True)
+        else:
+            st.write("No common strengths detected yet.")
 
         st.markdown("**Most Common Skill Gaps Across Candidates**")
         if insights["top_missing_skills"]:
