@@ -1,6 +1,6 @@
 # 🚀 ResumeIQ – AI-Powered Resume Screening System
 
-[![Version](https://img.shields.io/badge/version-v1.2-blue.svg)](https://github.com/Momina29311/ai-resume-screening-system)
+[![Version](https://img.shields.io/badge/version-v2.0-blue.svg)](https://github.com/Momina29311/ai-resume-screening-system)
 [![Status](https://img.shields.io/badge/status-active%20development-orange.svg)](https://github.com/Momina29311/ai-resume-screening-system)
 [![Python](https://img.shields.io/badge/python-3.14+-3776AB.svg?logo=python&logoColor=white)](https://www.python.org/)
 [![Streamlit](https://img.shields.io/badge/streamlit-live-red.svg?logo=streamlit&logoColor=white)](https://streamlit.io/)
@@ -12,9 +12,9 @@
 
 # 📄 ResumeIQ
 
-ResumeIQ is an AI-powered Resume Screening System that automates early-stage recruitment by parsing resumes, extracting technical skills, comparing candidates against job descriptions using both keyword and semantic matching, calculating ATS scores, ranking applicants, and presenting recruiter-friendly hiring insights through an interactive dashboard.
+ResumeIQ is an AI-powered Resume Screening System that automates early-stage recruitment by parsing resumes, extracting technical skills, comparing candidates against job descriptions using both keyword and semantic matching, calculating ATS scores, ranking applicants with a hybrid AI score, and explaining every ranking decision through an interactive, transparent recruiter dashboard.
 
-The project combines Natural Language Processing (NLP), sentence-embedding-based semantic similarity, rule-based AI, automated testing, Docker containerization, cloud deployment, centralized configuration, logging, and CI/CD to simulate a production-ready AI application.
+The project combines Natural Language Processing (NLP), sentence-embedding-based semantic similarity, rule-based AI, explainable AI (XAI) reasoning, automated testing, Docker containerization, cloud deployment, centralized configuration, logging, and CI/CD to simulate a production-ready AI application.
 
 Built publicly as part of my Machine Learning & AI Engineering journey.
 
@@ -64,10 +64,11 @@ https://momina-resumeiq.streamlit.app
 - Identify matched skills
 - Identify missing skills
 - Calculate keyword Match Percentage
+- Required vs. Preferred skill parsing from job descriptions
 
 ---
 
-## 🧬 Semantic Matching Engine (NEW)
+## 🧬 Semantic Matching Engine
 
 Goes beyond keyword overlap to understand meaning and context.
 
@@ -90,8 +91,8 @@ Transparent rule-based ATS scoring with explainable weighted categories.
 | Experience | 20 |
 | Education | 15 |
 | Projects | 10 |
-| Certifications | 10 |
-| Resume Completeness | 5 |
+| Certifications | 8 |
+| Resume Completeness | 7 |
 
 ### Output
 
@@ -103,28 +104,52 @@ Transparent rule-based ATS scoring with explainable weighted categories.
 
 ---
 
-## 🧮 Final Ranking Score (NEW)
+## 🧮 Hybrid AI Ranking Score
 
-Each candidate now gets a blended **Final Score** in addition to their raw ATS Score:
+Each candidate gets a blended **Final Score** that combines rule-based scoring, conceptual fit, and career depth — not ATS alone.
 
 ```
-Final Score = (ATS Score × 0.7) + (Semantic Match % × 0.3)
+Final Score = (ATS Score × 0.60) + (Semantic Match % × 0.30) + (Experience Score × 0.10)
 ```
 
-Candidate ranking, "Top Candidate" selection, and score-gap calculations are now based on Final Score rather than ATS Score alone.
+- **Experience Score** is a 0–100 normalization of detected years of experience, extracted two ways: explicit phrasing ("5 years of experience") and computed career span from job-history date ranges (e.g. "Mar 2022 – Present"), taking whichever detection yields more credit.
+- Candidate ranking, "Top Candidate" selection, and score-gap calculations are based on Final Score rather than raw ATS Score.
+
+---
+
+## 🧠 Explainable AI (XAI)
+
+ResumeIQ doesn't just say *"ATS Score: 89"* — it explains **why** a candidate ranked where they did, turning the ranking engine from a black box into a transparent, audit-friendly system.
+
+### XAI Capabilities
+
+- **AI Decision Explanations** — plain-language reasoning for every ranked candidate, generated relative to the rest of the pool (e.g. "High ATS score", "Strong semantic similarity", "Few missing skills")
+- **Score Contribution Breakdown** — the Final Score shown as a transparent calculation:
+  ```
+  ATS Score Contribution     : 70 × 0.60 = 42.0
+  Semantic Similarity        : 92 × 0.30 = 27.6
+  Experience Bonus           : 100 × 0.10 = 10.0
+  Final Score                : 79.6
+  ```
+- **Strengths & Weaknesses** — automatically generated per candidate, separate from raw feedback, rendered as scannable pills on the dashboard
+- **Recommendation Reasoning** — recommendation labels ("Highly Recommended", "Consider", "Not Recommended") now carry structured, supporting reasons instead of a bare tag
+- **Candidate Comparison Explanation** — head-to-head comparisons show *why* one candidate ranks above another (e.g. "Ali ranks higher because: + Better semantic similarity, + More experience, + More required skills matched")
+- **Recruiter Insights Upgrade** — Top strengths across the whole candidate pool, most common missing skills, and best overall candidate, surfaced on the Insights dashboard
+- **Explainability Report Export** — downloadable JSON and CSV reports containing score breakdowns, strengths, weaknesses, and recommendation reasoning for every candidate, separate from the raw ranking export
 
 ---
 
 ## 🏆 Candidate Ranking
 
 - Upload multiple resumes
-- Automatic candidate ranking by Final Score
+- Automatic candidate ranking by Final Score (Hybrid AI Score)
 - Sort by Final Score, ATS Score, Semantic Match, Keyword Match, or Years Experience
 - Filter by minimum ATS score and recommendation level
-- Top candidate recommendation
-- Candidate comparison (ATS Score, Keyword Match, Semantic Match, Final Score, Years Exp.)
+- Top candidate recommendation with explainable reasoning
+- Candidate comparison (ATS Score, Keyword Match, Semantic Match, Final Score, Years Exp.) with head-to-head XAI reasoning
 - Ranking table
-- CSV & JSON export (now includes semantic score and final score)
+- CSV & JSON export (includes semantic score, experience score, and final score)
+- Explainability report export (JSON & CSV)
 
 ---
 
@@ -136,14 +161,17 @@ Recruiters can move beyond individual resumes and analyze the entire hiring pipe
 
 - Average ATS Score
 - Average Keyword Match %
-- Average Semantic Match % (NEW)
-- Highest Semantic Match % (NEW)
+- Average Semantic Match %
+- Highest Semantic Match %
+- Average / Highest Final Score
+- Best Overall Candidate (NEW)
+- Top Strengths Across Candidates (NEW)
 - Candidate Statistics
 - Skill Gap Analysis
 - Recommendation Distribution
 - ATS Score Distribution
 
-These insights help recruiters quickly understand candidate quality and identify the most common missing skills across applicants.
+These insights help recruiters quickly understand candidate quality and identify the most common missing skills and strengths across applicants.
 
 ---
 
@@ -158,12 +186,13 @@ The dashboard provides an end-to-end hiring workflow.
 - Skill Analysis
 - Job Description Matching (Keyword + Semantic)
 - ATS Score Dashboard
-- Semantic Match Comparison Chart (NEW)
-- Candidate Ranking
+- Semantic Match Comparison Chart
+- Hybrid AI Candidate Ranking
+- Explainability Panel per Candidate (NEW)
 - Hiring Insights
-- Candidate Comparison
+- Candidate Comparison with XAI Reasoning (NEW)
 - Feedback & Recommendations
-- JSON & CSV Export
+- JSON & CSV Export (Ranking + Explainability Reports)
 
 ---
 
@@ -221,10 +250,15 @@ GitHub Actions automatically:
          Explainable ATS Score Engine
                     │
                     ▼
-        Final Score Blending (ATS + Semantic)
+   Hybrid Final Score (ATS + Semantic + Experience)
                     │
                     ▼
           Candidate Ranking System
+                    │
+                    ▼
+        Explainable AI (XAI) Layer
+     (Score Breakdown, Strengths/Weaknesses,
+      Recommendation Reasoning, Comparisons)
                     │
                     ▼
         Recruiter Hiring Insights
@@ -234,13 +268,13 @@ GitHub Actions automatically:
                     │
           ┌─────────┴─────────┐
           ▼                   ▼
-     JSON / CSV Export   Live Deployment
-                                   │
-                                   ▼
-                          Docker Container
-                                   │
-                                   ▼
-                           GitHub Actions CI
+ Ranking + Explainability   Live Deployment
+      JSON / CSV Export             │
+                                     ▼
+                            Docker Container
+                                     │
+                                     ▼
+                             GitHub Actions CI
 ```
 
 ---
@@ -319,7 +353,7 @@ ai-resume-screening-system/
     ├── matcher.py
     ├── semantic_matcher.py
     ├── ats_score.py
-    ├── ranking.py
+    ├── ranking.py          # Hybrid scoring + Explainable AI (XAI) engine
     └── config.py
 ```
 
@@ -332,7 +366,7 @@ Current automated tests cover:
 - Resume Parsing
 - Resume Matching (keyword + semantic)
 - ATS Score Engine
-- Candidate Ranking
+- Candidate Ranking (hybrid scoring)
 
 ✅ **46 Automated Tests** — run on every push via GitHub Actions CI
 
@@ -382,6 +416,19 @@ http://localhost:8501
 
 ---
 
+## 🛡 Engineering Quality (v2.0)
+
+ResumeIQ's final pass focused entirely on quality, not new features — the kind of work that separates a working prototype from a portfolio-ready project.
+
+- **Error handling** — corrupted, encrypted, or scanned-image-only PDFs are caught per-file and skipped with a clear message instead of crashing the batch; a missing skills database or semantic model load failure surfaces a friendly error instead of a stack trace.
+- **Performance** — the sentence-transformers model loads lazily and is cached as a singleton, so it's loaded once per process (not per rerun), and modules that don't need it stay fast to import.
+- **Bug fixes found during the audit** — `save_extracted_text()` was silently returning `None` instead of the saved file path; `ATSResult.missing_skills` was storing a raw skill list where a count was expected. Both fixed.
+- **Refactoring** — shared tiered-scoring logic (projects/certifications) extracted into one helper instead of two near-duplicate blocks; unused parameters removed; dead/unreachable code removed from the PDF parser.
+- **Testing** — a smoke-test suite (`tests/test_pipeline_smoke.py`) covers skill extraction, ATS scoring, and ranking's scoring/comparison logic against real module code.
+- **Documentation** — every module now has a docstring explaining its role and, where relevant, how it relates to other modules (e.g. why two independent ATS scorers currently coexist in the codebase — a documented architectural note, not an oversight).
+
+---
+
 # 📅 Development Timeline
 
 | Version | Milestone | Status |
@@ -397,21 +444,24 @@ http://localhost:8501
 | v0.9 | Docker Support | ✅ |
 | v1.0 | GitHub Actions CI + Configuration & Logging | ✅ |
 | v1.1 | Recruiter Hiring Insights Dashboard | ✅ |
-| **v1.2** | **Semantic Matching Engine + Final Score Blending** | ✅ |
+| v1.2 | Semantic Matching Engine + Score Blending | ✅ |
+| v1.3 | Hybrid AI Candidate Ranking (ATS + Semantic + Experience) | ✅ |
+| v1.4 | Explainable AI (XAI) for Candidate Ranking | ✅ |
+| **v2.0** | **Production Polish & Project Finalization** | ✅ |
 
 ---
 
-# 🚀 Next Roadmap
+# 🏁 Project Status
 
-- Explainable AI (XAI)
-- Machine Learning-based ATS Prediction
-- OCR for Scanned Resumes
-- Resume Embedding Caching for Faster Re-Ranking
-- Recruiter Authentication
+ResumeIQ is complete as an end-to-end Data Science project — from PDF parsing through NLP, hybrid AI ranking, explainable scoring, and interactive analytics. Development intentionally concluded at v2.0 rather than continuing to add unrelated features, in favor of a polished, production-minded finish: refactored code, real error handling, cached model loading, and test coverage on the core scoring logic.
+
+Possible directions for a future iteration (not currently planned):
+
+- Recruiter authentication & multi-user accounts
+- Resume screening history / persistent storage
+- OCR for scanned resumes
 - REST API
-- MLOps Pipeline
-- Kubernetes Deployment
-- Cloud Database Integration
+- Cloud deployment hardening (MLOps, Kubernetes)
 
 ---
 
