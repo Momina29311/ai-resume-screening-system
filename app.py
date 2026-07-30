@@ -20,248 +20,120 @@ from src.ranking import (
     explain_ranking,
     compare_candidates_explanation,
 )
-from src.auth import render_login_page, render_sidebar_user_info
 
 st.set_page_config(page_title="ResumeIQ", page_icon="🚀", layout="wide")
 
 st.markdown(
     """
     <style>
-    /* ==========================================================================
-       ResumeIQ — "Recruiter's Desk" design system
-       A recruiter's late-night desk, not a generic AI dashboard: ink-navy
-       background, a warm desk-lamp glow, highlighter-marker accents for
-       matched/missing signals, and rubber-stamp badges for recommendations —
-       drawn from how a recruiter actually marks up a paper resume.
-       ========================================================================== */
-
-    @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&family=Work+Sans:wght@400;500;600&display=swap');
-
-    :root {
-        --ink-navy: #0B1220;
-        --ink-navy-deep: #070B14;
-        --panel: #141B2E;
-        --panel-edge: rgba(237,233,221,0.09);
-        --paper: #EDE9DD;
-        --paper-dim: #9AA3B8;
-        --highlighter: #FFDE45;
-        --highlighter-dim: rgba(255,222,69,0.16);
-        --marker-green: #2CFFA6;
-        --marker-green-dim: rgba(44,255,166,0.16);
-        --flag-coral: #FF5B6E;
-        --flag-coral-dim: rgba(255,91,110,0.16);
-        --stamp-blue: #41C3FF;
-        --stamp-blue-dim: rgba(65,195,255,0.16);
-        --accent-pink: #FF4FD8;
-        --accent-pink-dim: rgba(255,79,216,0.16);
-        --font-display: 'Space Grotesk', sans-serif;
-        --font-mono: 'IBM Plex Mono', monospace;
-        --font-body: 'Work Sans', sans-serif;
-    }
-
-    html, body, [data-testid="stAppViewContainer"] {
-        font-family: var(--font-body);
-    }
-
     [data-testid="stAppViewContainer"] {
         background:
-            radial-gradient(ellipse 900px 500px at 8% -5%, rgba(255,222,69,0.12), transparent 55%),
-            radial-gradient(ellipse 700px 500px at 100% 0%, rgba(65,195,255,0.10), transparent 50%),
-            radial-gradient(ellipse 600px 400px at 50% 100%, rgba(255,79,216,0.05), transparent 60%),
-            var(--ink-navy);
-        color: var(--paper);
+            radial-gradient(circle at top left, rgba(255, 87, 87, 0.12), transparent 28%),
+            radial-gradient(circle at top right, rgba(88, 166, 255, 0.10), transparent 24%),
+            linear-gradient(135deg, #090b12 0%, #0f1220 45%, #090b12 100%);
+        color: #f5f7fb;
     }
 
     [data-testid="stSidebar"] {
-        background: var(--ink-navy-deep);
-        border-right: 1px dashed var(--panel-edge);
+        background: linear-gradient(180deg, #1b1d2a 0%, #121420 100%);
+        border-right: 1px solid rgba(255,255,255,0.08);
     }
 
     [data-testid="stHeader"] {
         background: rgba(0,0,0,0);
     }
 
-    h1, h2, h3, .stMarkdown h1, .stMarkdown h2, .stMarkdown h3 {
-        font-family: var(--font-display) !important;
-        letter-spacing: -0.01em;
-    }
-
-    @keyframes fadeUpIn {
-        from { opacity: 0; transform: translateY(14px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
-
-    .fade-in-1 { animation: fadeUpIn 0.55s ease both; }
-    .fade-in-2 { animation: fadeUpIn 0.55s ease 0.1s both; }
-    .fade-in-3 { animation: fadeUpIn 0.55s ease 0.2s both; }
-
-    @keyframes dotPulse {
-        0% { box-shadow: 0 0 0 0 rgba(44,255,166,0.55); }
-        70% { box-shadow: 0 0 0 7px rgba(44,255,166,0); }
-        100% { box-shadow: 0 0 0 0 rgba(44,255,166,0); }
-    }
-
-    .hero-badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.45rem;
-        padding: 0.3rem 0.7rem;
-        border-radius: 4px;
-        background: var(--stamp-blue-dim);
-        border: 1px solid rgba(65,195,255,0.4);
-        color: var(--stamp-blue);
-        font-family: var(--font-mono);
-        font-size: 0.78rem;
-        font-weight: 600;
-        letter-spacing: 0.06em;
-        text-transform: uppercase;
-    }
-
-    .hero-badge::before {
-        content: "";
-        width: 7px;
-        height: 7px;
-        border-radius: 50%;
-        background: var(--marker-green);
-        animation: dotPulse 2s infinite;
-    }
-
     .main-title {
-        font-family: var(--font-display);
-        font-size: 2.9rem;
-        font-weight: 700;
-        line-height: 1.08;
-        letter-spacing: -0.02em;
-        color: var(--paper);
-        margin-top: 0.35rem;
-        margin-bottom: 0.4rem;
-        position: relative;
-        display: inline-block;
-    }
-
-    .main-title .hl {
-        position: relative;
-        white-space: nowrap;
-    }
-
-    .main-title .hl::after {
-        content: "";
-        position: absolute;
-        left: -0.05em;
-        right: -0.05em;
-        bottom: 0.06em;
-        height: 0.34em;
-        background: var(--highlighter);
-        opacity: 0.85;
-        z-index: -1;
-        transform: rotate(-0.6deg);
-        border-radius: 2px;
+        font-size: 3rem;
+        font-weight: 900;
+        line-height: 1.05;
+        letter-spacing: -0.03em;
+        background: linear-gradient(90deg, #ffffff, #ff6b6b, #ffd93d, #4d96ff, #ffffff);
+        background-size: 300% 300%;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        animation: gradientMove 7s ease infinite;
+        margin-top: 0.2rem;
+        margin-bottom: 0.35rem;
     }
 
     .subtitle {
-        color: var(--paper-dim);
+        color: #a7afc4;
         font-size: 1rem;
-        max-width: 62ch;
-        margin-bottom: 1.4rem;
+        margin-bottom: 1.3rem;
     }
 
-    /* Sticky-note style pills — flat highlighter colors, brighten and lift on hover */
-    .insight-pill, .reason-pill, .strength-pill, .weakness-pill {
+    @keyframes gradientMove {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+    }
+
+    .glass-card {
+        background: rgba(255,255,255,0.04);
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 18px;
+        padding: 1rem 1.1rem;
+        box-shadow: 0 12px 30px rgba(0,0,0,0.18);
+        backdrop-filter: blur(10px);
+        transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+    }
+
+    .glass-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 18px 36px rgba(0,0,0,0.28);
+        border-color: rgba(255,255,255,0.16);
+    }
+
+    .hero-badge {
         display: inline-block;
-        font-family: var(--font-mono);
-        font-size: 0.78rem;
-        font-weight: 500;
-        padding: 0.32rem 0.65rem;
-        margin: 0.16rem 0.28rem 0.16rem 0;
-        border-radius: 3px;
-        border: 1px solid transparent;
-        transition: transform 0.15s ease, box-shadow 0.15s ease;
+        padding: 0.35rem 0.75rem;
+        border-radius: 999px;
+        background: linear-gradient(90deg, rgba(255,107,107,0.18), rgba(77,150,255,0.18));
+        border: 1px solid rgba(255,255,255,0.09);
+        color: #e8ecff;
+        font-size: 0.88rem;
+        animation: pulseGlow 2.2s infinite;
     }
 
-    .insight-pill:hover, .reason-pill:hover, .strength-pill:hover, .weakness-pill:hover {
-        transform: translateY(-2px);
-    }
-
-    .insight-pill {
-        background: rgba(237,233,221,0.06);
-        border-color: var(--panel-edge);
-        color: var(--paper);
-    }
-
-    .reason-pill, .strength-pill {
-        background: var(--marker-green-dim);
-        border-color: rgba(44,255,166,0.4);
-        color: var(--marker-green);
-    }
-
-    .reason-pill:hover, .strength-pill:hover {
-        box-shadow: 0 4px 14px rgba(44,255,166,0.18);
-    }
-
-    .weakness-pill {
-        background: var(--flag-coral-dim);
-        border-color: rgba(255,91,110,0.4);
-        color: var(--flag-coral);
-    }
-
-    .weakness-pill:hover {
-        box-shadow: 0 4px 14px rgba(255,91,110,0.18);
-    }
-
-    /* Recommendation callouts styled as ink rubber-stamps, with a stamp-down entrance */
-    @keyframes stampIn {
-        0% { opacity: 0; transform: scale(1.4) rotate(-8deg); }
-        60% { opacity: 1; transform: scale(0.96) rotate(1deg); }
-        100% { opacity: 1; transform: scale(1) rotate(0deg); }
-    }
-
-    .recommend-good, .recommend-mid, .recommend-bad {
-        font-family: var(--font-mono);
-        border-radius: 6px;
-        padding: 0.95rem 1.1rem;
-        border: 2px dashed;
-        position: relative;
-        animation: stampIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both;
-    }
-
-    .recommend-good b, .recommend-mid b, .recommend-bad b {
-        display: inline-block;
-        text-transform: uppercase;
-        letter-spacing: 0.08em;
-        transform: rotate(-1.5deg);
-        font-size: 0.95rem;
+    @keyframes pulseGlow {
+        0% { box-shadow: 0 0 0 0 rgba(77,150,255,0.22); }
+        70% { box-shadow: 0 0 0 14px rgba(77,150,255,0); }
+        100% { box-shadow: 0 0 0 0 rgba(77,150,255,0); }
     }
 
     .recommend-good {
-        background: var(--marker-green-dim);
-        border-color: rgba(44,255,166,0.6);
-        color: var(--marker-green);
-        box-shadow: 0 0 22px rgba(44,255,166,0.08);
+        background: linear-gradient(90deg, rgba(46,204,113,0.20), rgba(39,174,96,0.12));
+        border: 1px solid rgba(46,204,113,0.35);
+        color: #b7ffca;
+        border-radius: 16px;
+        padding: 0.9rem 1rem;
     }
 
     .recommend-mid {
-        background: var(--highlighter-dim);
-        border-color: rgba(255,222,69,0.6);
-        color: var(--highlighter);
-        box-shadow: 0 0 22px rgba(255,222,69,0.08);
+        background: linear-gradient(90deg, rgba(241,196,15,0.18), rgba(243,156,18,0.10));
+        border: 1px solid rgba(241,196,15,0.28);
+        color: #ffe7a0;
+        border-radius: 16px;
+        padding: 0.9rem 1rem;
     }
 
     .recommend-bad {
-        background: var(--flag-coral-dim);
-        border-color: rgba(255,91,110,0.6);
-        color: var(--flag-coral);
-        box-shadow: 0 0 22px rgba(255,91,110,0.08);
+        background: linear-gradient(90deg, rgba(231,76,60,0.18), rgba(192,57,43,0.10));
+        border: 1px solid rgba(231,76,60,0.30);
+        color: #ffb0aa;
+        border-radius: 16px;
+        padding: 0.9rem 1rem;
     }
 
-    /* Tip carousel — quiet, one deliberate motion */
     .tip-carousel {
         position: relative;
         height: 2.6rem;
         overflow: hidden;
-        border-radius: 6px;
-        background: var(--panel);
-        border: 1px dashed var(--panel-edge);
-        margin-bottom: 1.2rem;
+        border-radius: 999px;
+        background: rgba(255,255,255,0.04);
+        border: 1px solid rgba(255,255,255,0.08);
+        margin-bottom: 1.1rem;
         padding: 0 1.1rem;
     }
 
@@ -271,9 +143,8 @@ st.markdown(
         right: 1.1rem;
         top: 50%;
         transform: translateY(-50%);
-        color: var(--paper-dim);
-        font-family: var(--font-mono);
-        font-size: 0.85rem;
+        color: #c7cee6;
+        font-size: 0.92rem;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
@@ -287,163 +158,116 @@ st.markdown(
     .tip-carousel .tip-slide:nth-child(4) { animation-delay: 12s; }
 
     @keyframes tipCycle {
-        0% { opacity: 0; transform: translate(10px, -50%); }
+        0% { opacity: 0; transform: translate(12px, -50%); }
         3% { opacity: 1; transform: translate(0, -50%); }
         22% { opacity: 1; transform: translate(0, -50%); }
-        25% { opacity: 0; transform: translate(-10px, -50%); }
+        25% { opacity: 0; transform: translate(-12px, -50%); }
         100% { opacity: 0; }
     }
 
-    /* Folder-tab navigation */
-    .stTabs [data-baseweb="tab-list"] {
-        gap: 4px;
-        border-bottom: 2px solid var(--panel-edge);
-    }
-
-    .stTabs [data-baseweb="tab"] {
-        font-family: var(--font-mono);
+    .insight-pill {
+        display: inline-block;
+        padding: 0.3rem 0.7rem;
+        margin: 0.15rem;
+        border-radius: 999px;
+        background: rgba(255,255,255,0.06);
+        border: 1px solid rgba(255,255,255,0.12);
+        color: #e8ecff;
         font-size: 0.85rem;
-        font-weight: 600;
-        letter-spacing: 0.02em;
-        background: var(--panel);
-        border: 1px solid var(--panel-edge);
-        border-bottom: none;
-        border-radius: 8px 8px 0 0;
-        color: var(--paper-dim);
-        padding: 0.55rem 1.1rem;
     }
 
-    .stTabs [aria-selected="true"] {
-        background: var(--ink-navy);
-        color: var(--highlighter) !important;
-        border-color: rgba(255,222,69,0.45);
-        box-shadow: 0 -2px 16px rgba(255,222,69,0.12);
+    .animate-in {
+        animation: fadeUp 0.5s ease both;
     }
 
-    /* Dossier-card panels (expanders) */
+    @keyframes fadeUp {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
     div[data-testid="stExpander"] {
-        border: 1px solid var(--panel-edge);
-        border-left: 3px solid var(--stamp-blue);
-        border-radius: 8px;
-        background: var(--panel);
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 14px;
+        background: rgba(255,255,255,0.03);
     }
 
-    div[data-testid="stButton"] > button,
-    div[data-testid="stDownloadButton"] > button,
-    div[data-testid="stFormSubmitButton"] > button {
-        font-family: var(--font-mono);
-        font-weight: 600;
-        border-radius: 6px;
-        transition: transform 0.15s ease, box-shadow 0.15s ease;
+    div[data-testid="stButton"] > button {
+        border-radius: 12px;
+        transition: all 0.25s ease;
+    }
+
+    div[data-testid="stButton"] > button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.22);
     }
 
     [data-testid="stMetric"] {
-        background: var(--panel);
-        border: 1px solid var(--panel-edge);
-        border-radius: 8px;
+        background: rgba(255,255,255,0.04);
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 16px;
         padding: 0.75rem 0.8rem;
+        box-shadow: 0 8px 18px rgba(0,0,0,0.14);
     }
 
-    [data-testid="stMetricLabel"] {
-        font-family: var(--font-mono);
-        color: var(--paper-dim);
+    .reason-pill {
+        display: inline-block;
+        padding: 0.35rem 0.8rem;
+        margin: 0.2rem 0.25rem 0.2rem 0;
+        border-radius: 999px;
+        background: rgba(46,204,113,0.14);
+        border: 1px solid rgba(46,204,113,0.30);
+        color: #b7ffca;
+        font-size: 0.88rem;
     }
 
-    [data-testid="stMetricValue"] {
-        font-family: var(--font-display);
-        color: var(--paper);
+    .strength-pill {
+        display: inline-block;
+        padding: 0.32rem 0.75rem;
+        margin: 0.18rem 0.25rem 0.18rem 0;
+        border-radius: 999px;
+        background: rgba(46,204,113,0.14);
+        border: 1px solid rgba(46,204,113,0.30);
+        color: #b7ffca;
+        font-size: 0.86rem;
     }
 
-    /* Score-contribution ledger rows */
+    .weakness-pill {
+        display: inline-block;
+        padding: 0.32rem 0.75rem;
+        margin: 0.18rem 0.25rem 0.18rem 0;
+        border-radius: 999px;
+        background: rgba(231,76,60,0.14);
+        border: 1px solid rgba(231,76,60,0.30);
+        color: #ffb0aa;
+        font-size: 0.86rem;
+    }
+
     .breakdown-row {
         display: flex;
         justify-content: space-between;
-        padding: 0.5rem 0.75rem;
-        border-radius: 4px;
-        background: var(--ink-navy-deep);
-        border: 1px solid var(--panel-edge);
+        padding: 0.45rem 0.7rem;
+        border-radius: 10px;
+        background: rgba(255,255,255,0.03);
+        border: 1px solid rgba(255,255,255,0.06);
         margin-bottom: 0.35rem;
-        font-family: var(--font-mono);
-        font-size: 0.86rem;
-        color: var(--paper);
+        font-size: 0.92rem;
+        color: #e8ecff;
     }
 
     .breakdown-row.total {
-        background: var(--highlighter-dim);
-        border-color: rgba(255,222,69,0.4);
-        color: var(--highlighter);
+        background: rgba(77,150,255,0.12);
+        border-color: rgba(77,150,255,0.28);
         font-weight: 700;
-    }
-
-    /* Login / signup card — animated rotating gradient ring, "case under review" glow */
-    @keyframes ringSpin {
-        from { transform: rotate(0deg); }
-        to { transform: rotate(360deg); }
-    }
-
-    div[data-testid="stForm"] {
-        position: relative;
-        background: var(--panel);
-        border-radius: 10px;
-        padding: 1.5rem 1.5rem 0.5rem;
-        border: 1px solid var(--panel-edge);
-        isolation: isolate;
-        overflow: hidden;
-    }
-
-    div[data-testid="stForm"]::before {
-        content: "";
-        position: absolute;
-        inset: -2px;
-        z-index: -1;
-        border-radius: 10px;
-        background: conic-gradient(
-            from 0deg,
-            var(--highlighter),
-            var(--marker-green),
-            var(--stamp-blue),
-            var(--accent-pink),
-            var(--highlighter)
-        );
-        opacity: 0.35;
-        animation: ringSpin 6s linear infinite;
-    }
-
-    div[data-testid="stForm"]::after {
-        content: "";
-        position: absolute;
-        inset: 2px;
-        z-index: -1;
-        border-radius: 8px;
-        background: var(--panel);
-    }
-
-    div[data-testid="stButton"] > button:hover,
-    div[data-testid="stDownloadButton"] > button:hover,
-    div[data-testid="stFormSubmitButton"] > button:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(255,222,69,0.16), 0 2px 10px rgba(65,195,255,0.14);
     }
     </style>
     """,
     unsafe_allow_html=True,
 )
 
-# --- Recruiter Authentication Gate (Day 86) ---------------------------------
-# Nothing below this point renders until render_login_page() confirms the
-# visitor is authenticated (either via fresh login or a restored "Remember
-# Me" token). This is the single choke point protecting the whole dashboard.
-if not render_login_page():
-    st.stop()
-# -----------------------------------------------------------------------------
-
-st.markdown('<div class="hero-badge fade-in-1">Case File • ResumeIQ</div>', unsafe_allow_html=True)
+st.markdown('<div class="hero-badge">AI Recruiter Dashboard • ResumeIQ</div>', unsafe_allow_html=True)
+st.markdown('<div class="main-title">Resume Screening System</div>', unsafe_allow_html=True)
 st.markdown(
-    '<div class="main-title fade-in-2">Resume <span class="hl">Screening Desk</span></div>',
-    unsafe_allow_html=True,
-)
-st.markdown(
-    '<div class="subtitle fade-in-3">Upload resumes, extract skills, compare with a job description, and rank candidates with an explainable Hybrid AI ranking system.</div>',
+    '<div class="subtitle">Upload resumes, extract skills, compare with a job description, and rank candidates with an explainable Hybrid AI ranking system.</div>',
     unsafe_allow_html=True,
 )
 
@@ -466,7 +290,6 @@ ats_scorer = ATSScorer()
 
 st.sidebar.header("Project Tools")
 st.sidebar.write("Use this app to parse resumes and rank them against a job description.")
-render_sidebar_user_info()
 if st.session_state.parsed_resumes:
     st.sidebar.metric("Resumes Parsed", len(st.session_state.parsed_resumes))
 if st.session_state.ranking_results:
