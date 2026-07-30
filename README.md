@@ -1,6 +1,10 @@
 # 🚀 ResumeIQ – AI-Powered Resume Screening System
 
+
 [![Version](https://img.shields.io/badge/version-v1.4-blue.svg)](https://github.com/Momina29311/ai-resume-screening-system)
+
+[![Version](https://img.shields.io/badge/version-v2.0-blue.svg)](https://github.com/Momina29311/ai-resume-screening-system)
+
 [![Status](https://img.shields.io/badge/status-active%20development-orange.svg)](https://github.com/Momina29311/ai-resume-screening-system)
 [![Python](https://img.shields.io/badge/python-3.14+-3776AB.svg?logo=python&logoColor=white)](https://www.python.org/)
 [![Streamlit](https://img.shields.io/badge/streamlit-live-red.svg?logo=streamlit&logoColor=white)](https://streamlit.io/)
@@ -416,6 +420,19 @@ http://localhost:8501
 
 ---
 
+## 🛡 Engineering Quality (v2.0)
+
+ResumeIQ's final pass focused entirely on quality, not new features — the kind of work that separates a working prototype from a portfolio-ready project.
+
+- **Error handling** — corrupted, encrypted, or scanned-image-only PDFs are caught per-file and skipped with a clear message instead of crashing the batch; a missing skills database or semantic model load failure surfaces a friendly error instead of a stack trace.
+- **Performance** — the sentence-transformers model loads lazily and is cached as a singleton, so it's loaded once per process (not per rerun), and modules that don't need it stay fast to import.
+- **Bug fixes found during the audit** — `save_extracted_text()` was silently returning `None` instead of the saved file path; `ATSResult.missing_skills` was storing a raw skill list where a count was expected. Both fixed.
+- **Refactoring** — shared tiered-scoring logic (projects/certifications) extracted into one helper instead of two near-duplicate blocks; unused parameters removed; dead/unreachable code removed from the PDF parser.
+- **Testing** — a smoke-test suite (`tests/test_pipeline_smoke.py`) covers skill extraction, ATS scoring, and ranking's scoring/comparison logic against real module code.
+- **Documentation** — every module now has a docstring explaining its role and, where relevant, how it relates to other modules (e.g. why two independent ATS scorers currently coexist in the codebase — a documented architectural note, not an oversight).
+
+---
+
 # 📅 Development Timeline
 
 | Version | Milestone | Status |
@@ -433,12 +450,18 @@ http://localhost:8501
 | v1.1 | Recruiter Hiring Insights Dashboard | ✅ |
 | v1.2 | Semantic Matching Engine + Score Blending | ✅ |
 | v1.3 | Hybrid AI Candidate Ranking (ATS + Semantic + Experience) | ✅ |
+<<<<<<< HEAD
 | **v1.4** | **Explainable AI (XAI) for Candidate Ranking** | ✅ |
+=======
+| v1.4 | Explainable AI (XAI) for Candidate Ranking | ✅ |
+| **v2.0** | **Production Polish & Project Finalization** | ✅ |
+>>>>>>> polish-day86
 
 ---
 
-# 🚀 Next Roadmap
+# 🏁 Project Status
 
+<<<<<<< HEAD
 - LLM-powered Resume Feedback (personalized improvement suggestions)
 - Resume Summarization using an LLM
 - OCR for Scanned Resumes
@@ -449,6 +472,17 @@ http://localhost:8501
 - MLOps Pipeline
 - Kubernetes Deployment
 - Cloud Database Integration
+=======
+ResumeIQ is complete as an end-to-end Data Science project — from PDF parsing through NLP, hybrid AI ranking, explainable scoring, and interactive analytics. Development intentionally concluded at v2.0 rather than continuing to add unrelated features, in favor of a polished, production-minded finish: refactored code, real error handling, cached model loading, and test coverage on the core scoring logic.
+
+Possible directions for a future iteration (not currently planned):
+
+- Recruiter authentication & multi-user accounts
+- Resume screening history / persistent storage
+- OCR for scanned resumes
+- REST API
+- Cloud deployment hardening (MLOps, Kubernetes)
+>>>>>>> polish-day86
 
 ---
 

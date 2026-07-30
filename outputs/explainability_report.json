@@ -1,0 +1,90 @@
+[
+  {
+    "rank": 1,
+    "candidate": "AI_ML_Engineer_Resume_Maya_Chen.pdf",
+    "ats_score": 86,
+    "semantic_match_percent": 73.71,
+    "experience_score": 90.0,
+    "final_score": 82.7,
+    "score_breakdown": {
+      "ats_score": 86,
+      "ats_weight": 0.6,
+      "ats_contribution": 51.6,
+      "semantic_score": 73.71,
+      "semantic_weight": 0.3,
+      "semantic_contribution": 22.1,
+      "experience_score": 90.0,
+      "experience_weight": 0.1,
+      "experience_contribution": 9.0,
+      "final_score": 82.7
+    },
+    "strengths": [
+      "Excellent ATS score (86)",
+      "Strong experience depth (9 years)",
+      "12 matched skill(s), including aws, deep learning, docker"
+    ],
+    "weaknesses": [
+      "Missing data analysis",
+      "Missing data visualization",
+      "Missing numpy",
+      "Missing pandas",
+      "Missing rest api",
+      "Missing preferred skill: linux",
+      "Missing preferred skill: streamlit"
+    ],
+    "recommendation": {
+      "label": "Consider",
+      "reasons": [
+        "Excellent ATS score (86)",
+        "Strong experience depth (9 years)",
+        "Gap to close: Missing data analysis",
+        "Gap to close: Missing data visualization"
+      ]
+    }
+  },
+  {
+    "rank": 2,
+    "candidate": "Data_Analyst_Resume_Jordan_Reyes.pdf",
+    "ats_score": 75,
+    "semantic_match_percent": 46.1,
+    "experience_score": 70.0,
+    "final_score": 65.8,
+    "score_breakdown": {
+      "ats_score": 75,
+      "ats_weight": 0.6,
+      "ats_contribution": 45.0,
+      "semantic_score": 46.1,
+      "semantic_weight": 0.3,
+      "semantic_contribution": 13.8,
+      "experience_score": 70.0,
+      "experience_weight": 0.1,
+      "experience_contribution": 7.0,
+      "final_score": 65.8
+    },
+    "strengths": [
+      "Solid ATS score (75)",
+      "Strong experience depth (7 years)",
+      "6 matched skill(s), including git, github, numpy"
+    ],
+    "weaknesses": [
+      "Low semantic similarity to job description (46.1%)",
+      "Missing data analysis",
+      "Missing data visualization",
+      "Missing deep learning",
+      "Missing docker",
+      "Missing machine learning",
+      "Missing preferred skill: aws",
+      "Missing preferred skill: linux",
+      "Missing preferred skill: pytorch"
+    ],
+    "recommendation": {
+      "label": "Not Recommended",
+      "reasons": [
+        "Low semantic similarity to job description (46.1%)",
+        "Missing data analysis",
+        "Missing data visualization",
+        "Missing deep learning"
+      ]
+    }
+  }
+]

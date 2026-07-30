@@ -1,8 +1,8 @@
 [
   {
     "name": "AI_ML_Engineer_Resume_Maya_Chen.pdf",
-    "ats_score": 88,
-    "match_percent": 71,
+    "ats_score": 86,
+    "match_percent": 66,
     "years_experience": 9,
     "experience_score": 90.0,
     "matched_skills": [
@@ -20,50 +20,90 @@
       "tensorflow"
     ],
     "missing_skills": [
+      "data analysis",
+      "data visualization",
       "numpy",
       "pandas",
       "rest api",
-      "azure",
+      "linux",
       "streamlit"
     ],
     "missing_required_skills": [
+      "data analysis",
+      "data visualization",
       "numpy",
       "pandas",
       "rest api"
     ],
     "missing_preferred_skills": [
-      "azure",
+      "linux",
       "streamlit"
     ],
     "ats_breakdown": {
-      "skills": 28,
+      "skills": 26,
       "experience": 20,
       "education": 15,
       "projects": 10,
       "certifications": 8,
       "completeness": 7,
-      "total": 88
+      "total": 86
     },
     "recommendation_level": "Consider",
     "feedback": [
       "Strong overall profile with excellent alignment to the job description.",
       "Resume indicates approximately 9 year(s) of relevant experience.",
       "Matched strengths include: aws, deep learning, docker, git, github.",
-      "Missing required skills: numpy, pandas, rest api.",
-      "Suitable for interview after technical review."
+      "Missing required skills: data analysis, data visualization, numpy, pandas, rest api.",
+      "Needs improvement before recruiter shortlist."
     ],
     "recommendations": [
+      "Add data analysis experience to the resume \u2014 this is a required skill.",
+      "Add data visualization experience to the resume \u2014 this is a required skill.",
       "Add numpy experience to the resume \u2014 this is a required skill.",
       "Add pandas experience to the resume \u2014 this is a required skill.",
-      "Add rest api experience to the resume \u2014 this is a required skill.",
-      "Consider highlighting azure, listed as a preferred skill.",
+      "Consider highlighting linux, listed as a preferred skill.",
       "Consider highlighting streamlit, listed as a preferred skill."
     ],
-    "keyword_match_score": 72,
-    "semantic_match_score": 70.02,
-    "semantic_match_percent": 70.02,
+    "keyword_match_score": 63,
+    "semantic_match_score": 73.71,
+    "semantic_match_percent": 73.71,
     "semantic_match_label": "Moderate Semantic Match",
-    "final_score": 82.8,
+    "final_score": 82.7,
+    "score_breakdown": {
+      "ats_score": 86,
+      "ats_weight": 0.6,
+      "ats_contribution": 51.6,
+      "semantic_score": 73.71,
+      "semantic_weight": 0.3,
+      "semantic_contribution": 22.1,
+      "experience_score": 90.0,
+      "experience_weight": 0.1,
+      "experience_contribution": 9.0,
+      "final_score": 82.7
+    },
+    "strengths": [
+      "Excellent ATS score (86)",
+      "Strong experience depth (9 years)",
+      "12 matched skill(s), including aws, deep learning, docker"
+    ],
+    "weaknesses": [
+      "Missing data analysis",
+      "Missing data visualization",
+      "Missing numpy",
+      "Missing pandas",
+      "Missing rest api",
+      "Missing preferred skill: linux",
+      "Missing preferred skill: streamlit"
+    ],
+    "recommendation_reason": {
+      "label": "Consider",
+      "reasons": [
+        "Excellent ATS score (86)",
+        "Strong experience depth (9 years)",
+        "Gap to close: Missing data analysis",
+        "Gap to close: Missing data visualization"
+      ]
+    },
     "rank": 1,
     "score_gap_from_best": 0.0,
     "ranking_reasons": [
@@ -74,8 +114,8 @@
   },
   {
     "name": "Data_Analyst_Resume_Jordan_Reyes.pdf",
-    "ats_score": 76,
-    "match_percent": 41,
+    "ats_score": 75,
+    "match_percent": 39,
     "years_experience": 7,
     "experience_score": 70.0,
     "matched_skills": [
@@ -87,6 +127,8 @@
       "sql"
     ],
     "missing_skills": [
+      "data analysis",
+      "data visualization",
       "deep learning",
       "docker",
       "machine learning",
@@ -94,12 +136,14 @@
       "rest api",
       "scikit-learn",
       "aws",
-      "azure",
+      "linux",
       "pytorch",
       "streamlit",
       "tensorflow"
     ],
     "missing_required_skills": [
+      "data analysis",
+      "data visualization",
       "deep learning",
       "docker",
       "machine learning",
@@ -109,44 +153,81 @@
     ],
     "missing_preferred_skills": [
       "aws",
-      "azure",
+      "linux",
       "pytorch",
       "streamlit",
       "tensorflow"
     ],
     "ats_breakdown": {
-      "skills": 16,
+      "skills": 15,
       "experience": 20,
       "education": 15,
       "projects": 10,
       "certifications": 8,
       "completeness": 7,
-      "total": 76
+      "total": 75
     },
     "recommendation_level": "Not Recommended",
     "feedback": [
       "Solid candidate with good alignment, but a few gaps remain.",
       "Resume indicates approximately 7 year(s) of relevant experience.",
       "Matched strengths include: git, github, numpy, pandas, python.",
-      "Missing required skills: deep learning, docker, machine learning, natural language processing, rest api.",
+      "Missing required skills: data analysis, data visualization, deep learning, docker, machine learning.",
       "Needs improvement before recruiter shortlist."
     ],
     "recommendations": [
+      "Add data analysis experience to the resume \u2014 this is a required skill.",
+      "Add data visualization experience to the resume \u2014 this is a required skill.",
       "Add deep learning experience to the resume \u2014 this is a required skill.",
       "Add docker experience to the resume \u2014 this is a required skill.",
-      "Add machine learning experience to the resume \u2014 this is a required skill.",
-      "Add natural language processing experience to the resume \u2014 this is a required skill.",
       "Consider highlighting aws, listed as a preferred skill.",
-      "Consider highlighting azure, listed as a preferred skill.",
+      "Consider highlighting linux, listed as a preferred skill.",
       "Include measurable project outcomes."
     ],
-    "keyword_match_score": 41,
-    "semantic_match_score": 41.57,
-    "semantic_match_percent": 41.57,
+    "keyword_match_score": 36,
+    "semantic_match_score": 46.1,
+    "semantic_match_percent": 46.1,
     "semantic_match_label": "Weak Semantic Match",
-    "final_score": 65.1,
+    "final_score": 65.8,
+    "score_breakdown": {
+      "ats_score": 75,
+      "ats_weight": 0.6,
+      "ats_contribution": 45.0,
+      "semantic_score": 46.1,
+      "semantic_weight": 0.3,
+      "semantic_contribution": 13.8,
+      "experience_score": 70.0,
+      "experience_weight": 0.1,
+      "experience_contribution": 7.0,
+      "final_score": 65.8
+    },
+    "strengths": [
+      "Solid ATS score (75)",
+      "Strong experience depth (7 years)",
+      "6 matched skill(s), including git, github, numpy"
+    ],
+    "weaknesses": [
+      "Low semantic similarity to job description (46.1%)",
+      "Missing data analysis",
+      "Missing data visualization",
+      "Missing deep learning",
+      "Missing docker",
+      "Missing machine learning",
+      "Missing preferred skill: aws",
+      "Missing preferred skill: linux",
+      "Missing preferred skill: pytorch"
+    ],
+    "recommendation_reason": {
+      "label": "Not Recommended",
+      "reasons": [
+        "Low semantic similarity to job description (46.1%)",
+        "Missing data analysis",
+        "Missing data visualization",
+        "Missing deep learning"
+      ]
+    },
     "rank": 2,
-    "score_gap_from_best": 17.7,
+    "score_gap_from_best": 16.9,
     "ranking_reasons": [
       "\u2714 Balanced overall profile"
     ]
