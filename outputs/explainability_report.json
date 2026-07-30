@@ -1,0 +1,86 @@
+[
+  {
+    "rank": 1,
+    "candidate": "AI_ML_Engineer_Resume_Maya_Chen.pdf",
+    "ats_score": 85,
+    "semantic_match_percent": 65.19,
+    "experience_score": 90.0,
+    "final_score": 79.6,
+    "score_breakdown": {
+      "ats_score": 85,
+      "ats_weight": 0.6,
+      "ats_contribution": 51.0,
+      "semantic_score": 65.19,
+      "semantic_weight": 0.3,
+      "semantic_contribution": 19.6,
+      "experience_score": 90.0,
+      "experience_weight": 0.1,
+      "experience_contribution": 9.0,
+      "final_score": 79.6
+    },
+    "strengths": [
+      "Excellent ATS score (85)",
+      "Strong experience depth (9 years)",
+      "11 matched skill(s), including aws, docker, git"
+    ],
+    "weaknesses": [
+      "Missing data analysis",
+      "Missing data visualization",
+      "Missing numpy",
+      "Missing pandas",
+      "Missing preferred skill: streamlit"
+    ],
+    "recommendation": {
+      "label": "Consider",
+      "reasons": [
+        "Excellent ATS score (85)",
+        "Strong experience depth (9 years)",
+        "Gap to close: Missing data analysis",
+        "Gap to close: Missing data visualization"
+      ]
+    }
+  },
+  {
+    "rank": 2,
+    "candidate": "Data_Analyst_Resume_Jordan_Reyes.pdf",
+    "ats_score": 78,
+    "semantic_match_percent": 52.81,
+    "experience_score": 70.0,
+    "final_score": 69.6,
+    "score_breakdown": {
+      "ats_score": 78,
+      "ats_weight": 0.6,
+      "ats_contribution": 46.8,
+      "semantic_score": 52.81,
+      "semantic_weight": 0.3,
+      "semantic_contribution": 15.8,
+      "experience_score": 70.0,
+      "experience_weight": 0.1,
+      "experience_contribution": 7.0,
+      "final_score": 69.6
+    },
+    "strengths": [
+      "Solid ATS score (78)",
+      "Strong experience depth (7 years)",
+      "6 matched skill(s), including git, github, numpy"
+    ],
+    "weaknesses": [
+      "Missing data analysis",
+      "Missing data visualization",
+      "Missing machine learning",
+      "Missing scikit-learn",
+      "Missing preferred skill: aws",
+      "Missing preferred skill: docker",
+      "Missing preferred skill: natural language processing"
+    ],
+    "recommendation": {
+      "label": "Not Recommended",
+      "reasons": [
+        "Missing data analysis",
+        "Missing data visualization",
+        "Missing machine learning",
+        "Missing scikit-learn"
+      ]
+    }
+  }
+]
